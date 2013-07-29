@@ -1,0 +1,55 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<link href="disassembler.css" rel="stylesheet">
+	<script src="disassembler.js"></script>
+	<script src="disassembler.printer.console.js"></script>
+	<script src="disassembler.printer.html.js"></script>
+	<script src="disassembler.printer.object.js"></script>
+	<script src="disassembler.instructions.mips.js"></script>
+	<script src="Struct.js"></script>
+	<script src="Elf.js"></script>
+	<script src="../lib/jquery.js"></script>
+<head>
+<input type="file" onchange="main(event.target.files[0])"/>
+<button class="onFileLoad" onclick="disasmElf()">disasm(elf)</button>
+<button class="onFileLoad" onclick="disasmBin()">disasm(bin)</button>
+<button class="onFileDisasm" onclick="reasmElf()">reasm(elf)</button>
+<button class="onFileDisasm" onclick="reasmBin()">reasm(bin)</button>
+<table class="disasm" id="out"></table>
+<script>
+var file,elf,disasm;
+function main(f){
+	var reader = new FileReader();
+	reader.onloadend = function(f){
+		file=f.target.result;
+		console.log('ok');
+	};
+	reader.readAsArrayBuffer(f);
+}
+function disasmBin(){
+	if(file===undefined)return;
+	disasm=new Disassembler().setInstructions('mips')
+		.setProgram(new Uint32Array(file))//elf.programs[0]._content;
+		.setPrinter('html',{id:'out'})
+		.disassemble();
+}
+function disasmElf(){
+	elf=extract(file);
+	if(elf===undefined)return;
+	disasm=new Disassembler().setInstructions('mips')
+		.setProgram(new Uint32Array(elf.sections[1]._content))//elf.programs[0]._content;
+		.setPrinter('html',{id:'out'})
+		.disassemble();
+}
+function reasmElf(){
+	var instrs=document.getElementsByClassName('instr');
+	var array=[];
+	for(var i=0;i<instrs.length;i++){
+		array[i]=parseInt("0x"+instrs[i].textContent);
+	}
+	elf.sections[1]._content=new Uint32Array(array);
+	location.href=URL.createObjectURL(build(elf));
+}
+</script>
+</html>

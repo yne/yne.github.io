@@ -1,0 +1,66 @@
+.disasm{
+	border-collapse:collapse;
+	font-family:monospace;
+}
+*[onclick]{cursor: hand; cursor: pointer;}
+
+.disasm table{
+	margin:0;
+}
+.disasm>thead{
+	text-align:center;
+}
+.disasm>tbody td{
+	border:1px solid #888;
+	padding:0;
+}
+/* collumns */
+.pc{
+	text-align:right;
+}
+.instr{
+	text-align:right;
+}
+.instr{
+	padding:1px!important;
+}
+
+.op{
+	text-align:left;
+	width:75px;
+}
+/* args collumn */
+.args a{
+	text-align:right;
+	width:75px;
+}
+.args input{
+	padding-top: 1px;
+	padding-bottom: 1px;
+}
+.args select{
+	padding: 0px;
+}
+.args input,.args select{
+	border: 0;
+	margin: 0;
+	font-family:monospace;
+	text-align:right;
+	width:75px;
+	border-radius:3px;
+	box-shadow:#000 1px 1px 2px inset;
+}
+/* arguments */
+.arg {}
+.arg input{display:none;}
+.arg select{display:none;}
+.arg a{display:inline-block;}
+.arg:hover {}
+.arg:hover input {display:inline-block;border:none;}
+.arg:hover select{display:inline-block;}
+.arg:hover a{display:none;}
+
+.type_reg{color:#0D0;}
+.type_int{color:#000;}
+.type_off{color:#D00;}
+.type_rel{color:#00D;}

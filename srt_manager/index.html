@@ -1,0 +1,42 @@
+<style>
+	*{margin:0;padding:0}
+	textarea{resize: none; background: none;border:0;width:100%;height:100%;box-shadow:0px 0px 5px inset;}
+	table{width:100%;height:100%;}
+</style>
+<table>
+<tr><td><textarea id="ori" title="past original here"></textarea></td></tr>
+<tr height="1px"><td>
+	stretch ratio : <input id="strech" value="1.0000"/>
+	offset (ms) : <input id="offset" value="0"/>
+	<input type="button" value="convert" onclick="document.getElementById('mod').value=convert(document.getElementById('ori').value)"/>
+</td></tr>
+<tr><td><textarea id="mod" title="result"></textarea></td></tr>
+</table>
+<script>
+function stringsToTime(s){
+	return s[0]*360+s[1]*60+(s[2]+'.'+s[3])*1;
+}
+function timeToString(t){
+	var h=Math.floor(t/(60*60));
+	var m=Math.floor((t-(h*60))/(60));
+	var s=Math.floor(t%60);
+	var ms=Math.floor((t%1)*1000);
+//	var h=(t-m-s*60)%(60);
+	
+	return ''+h+':'+m+':'+s+','+ms;
+}
+function convert(input){
+	var lines=input.split(/\n/);
+	var strech=eval(document.getElementById('strech').value);
+	var offset=eval(document.getElementById('offset').value);
+	lines.forEach(function(line,i,b,c){
+		var timestamps=line.match(/(\d+):(\d+):(\d+),(\d+) --> (\d+):(\d+):(\d+),(\d+)/);
+		if(!timestamps)return;//not a timestamp line
+		var start=stringsToTime(timestamps.slice(1, 5))*strech+offset;
+		var end  =stringsToTime(timestamps.slice(5,10))*strech+offset;
+		lines[i]=timeToString(start)+' --'+'> '+timeToString(end);
+	})
+	return lines.join('\n');
+	
+}	
+</script>

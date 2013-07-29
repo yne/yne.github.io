@@ -1,0 +1,132 @@
+<html>
+<head>
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+<style>
+	body{margin:0;}
+	table{width:100%;border-collapse:collapse;}
+	thead{display:none;}
+	tr{background:#04B;color:#FFF;font-family:Segoe UI Light;}
+	td{padding:5px;}
+	td:hover{background:#1659C7;}
+	td:first-child{font-size: x-large;width:100%;max-width: 0;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;}
+	td a{visibility:hidden;}
+	td:hover a{visibility:visible;cursor:pointer;}
+	tr.http [title=upload],tr.http [title=ratio]{display:none;}
+</style>
+<script>
+var GUI={
+	obj2str:function(o){
+		var title="";
+		for(var a in o)
+			title+=a+" : "+(o[a].constructor==Object?'{\n'+this.obj2str(o[a])+'}':o[a])+'\n';
+		return title;
+	},
+	init:function(){
+		this.favico = new Image();
+		this.favico.src = 'favicon.ico';
+		this.login(function(){
+			var h=document.location.hash.substr(1);
+			if(h.length)this.add(h);
+		});
+		this.getList();
+		setInterval(this.getList.bind(this),5000);
+	},
+	ajax:function(type,param,cb){
+		function urlencoded(obj){
+			var list=[];
+			for(var p in obj)
+				list.push(p+"="+obj[p]);
+			return list.join('&');
+		}
+		var meth=["login","addTaskUrl"].indexOf(type)<0?"get":"post";
+		param.sid=localStorage.sid;
+		var url='dsReq.cgi?ver=3.0&operation='+type;
+		var xhr=new XMLHttpRequest();
+		xhr.open(meth,url+(meth=='get'?'&'+urlencoded(param):""));
+		xhr.onload=(function(ev){
+			var json=JSON.parse(ev.target.responseText);
+			if(json.errMsg)console.error(json.errMsg);
+			cb.call(this,json);
+		}).bind(this);
+		xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+		xhr.send(urlencoded(param));
+	},
+	login:function(cb){
+		if(!localStorage.pwd){
+			var cred=prompt("[user='admin':]password").split(':');
+			localStorage.usr=(cred.length==2)?cred[0]:'admin';
+			localStorage.pwd=btoa(cred[cred.length-1]);
+		}
+		this.ajax('login',{admin:1,user:localStorage.usr,pwd:localStorage.pwd},
+			function(res){
+				if(res.result=="success")
+					return cb.call(this,localStorage.sid=res.authSid);
+				this.login(localStorage.pwd="");
+			}
+		);
+	},
+	add:function(url){
+		this.ajax('addTaskUrl',{url:url,mvFolder:'Download',subfun:'task',type:'all'},
+			function(res){document.location.hash="";});
+	},
+	remove:function(a){
+		var tr=a.parentNode.parentNode,id=tr.id.split('_');
+		this.ajax('delTask',{delFile:confirm('delete files ?')?1:0,subfun:'task',taskID:id[1],type:id[0]},
+			function(){tr.remove();});
+	},
+	info:function(a){
+		var tr=a.parentNode.parentNode,id=tr.id.split('_');
+		this.ajax('getTaskInfo',{subfun:'task',id:id[1],type:id[0]},
+			function(res){alert(this.obj2str(res.taskInfo));});
+	},
+	getList:function(){
+		function nrmlz(size){
+			if(size.length>6)return (size/1000000).toPrecision(3)+"M";
+			if(size.length>3)return (size/1000).toPrecision(3)+"K";
+			return size;
+		}
+		this.ajax('getTaskListEx',{subfun:'task',status:'all',type:'all'},function(res){
+			var tb=document.querySelector('table'),html="";
+			res.taskList.forEach(function(task){
+				html+='<tr id="'+task.typeID+'" class="'+task.type+'">'+
+				'<td>'+
+					'<a title="remove" onclick="GUI.remove(this)">&times;</a>'+
+					'<a title="details" onclick="GUI.info(this)">&plus;</a>'+
+					'<span title="'+this.obj2str(task)+'">'+task.name+'</span></td>'+
+				'<td>'+nrmlz(task.size)+'b</td>'+
+				'<td>'+task.progress+'%</td>'+//task.size/task.downloadSize
+				'<td title="down">'+nrmlz(task.dlRate)+'b/s</td>'+
+				'<td title="upload">'+nrmlz(task.ulRate)+'b/s</td>'+
+				'<td title="ratio">'+(task.rating*1).toPrecision(2)+'</td>'+
+				'</tr>';
+				document.title=nrmlz(task.dlRate);
+			}.bind(this));
+			tb.innerHTML=html;
+		});
+	},
+};
+/*
+document.createElementEx=function(type,param){
+	var tag=document.createElement(type);
+	for(var p in param)tag[p]=param[p];
+	return tag;
+}
+	setFavicon:function(param){
+		var canvas = document.createElementEx('canvas',{width:16,height:16});
+		var ctx = canvas.getContext('2d');
+		if(this.favico)
+			ctx.drawImage(this.favico,0,0);
+		ctx.font = '9px sans-serif';
+		ctx.fillStyle = '#000';
+		for(var x=-1;x<2;x++)
+			for(var y=-1;y<2;y++)
+				ctx.fillText(param.label, x+param.x, y+param.y);
+		ctx.fillStyle = '#FFF';
+		ctx.fillText(param.label,param.x,param.y);
+		document.head.appendChild(document.createElementEx('link',{type:'image/x-icon',rel:'shortcut icon',href:canvas.toDataURL("image/x-icon")}));
+	},
+*/
+</script>
+</head>
+<body onload="GUI.init()"><table></table></body>
+</html>

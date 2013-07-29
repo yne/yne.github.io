@@ -1,0 +1,51 @@
+<html>
+	<head>
+		<title>TitleMap Creator</title>
+		<style>
+		</style>
+	</head>
+	<body class="container-fluid">
+		<h1>Description</h1>
+		<p>Create a title index array (the map) and it corresponding title list from the map image.
+		<h2>TODO</h2>
+		<ul>
+			<li>Missalignement error resilience</li>
+			<li>Horizontal/Vertical duplicate title detection</li>
+			<li>Recognize title over palette changing</li>
+			<li>Title replacing</li>
+			<li>Optimized algorithm ?!</li>
+		</ul>
+		</p>
+		<h1>Input</h1>
+		<label><select id="sel" onchange="if(this.value)change(this.value)">
+			<option value="">select a map</option>
+			<option value="zelda-snes-sample.png">zelda (snes) sample</option>
+			<option value="zelda-gbc.png">zelda (gbc)</option>
+			<option value="zelda-snes.png">zelda (snes)</option>
+			<option value="golden-sun2.png">golden sun 2 (gba)</option>
+		</select></label>
+		<img id="img"/>
+		<h1>Param</h1>
+		<label>Title Size :<select id="size">
+			<option>8</option>
+			<option selected="selected">16</option>
+			<option>32</option>
+		</select></label>
+		<label for="hmirror"><input type="checkbox" id="hmirror"/> H-Mirror</label>
+		<label for="vmirror"><input type="checkbox" id="vmirror"/> V-Mirror</label>
+		<button onclick="init(document.getElementById('img'),document.getElementById('size').value*1)">parse</button>
+		<h1>Output</h1>
+		<h2>Extracted titles list (<b id="progress">0</b>%)</h2>
+		<canvas id="titles" width="0" height="0"></canvas>
+		<h2>Title index matrix</h2>
+		<table id="map" class="table table-bordered table-condensed"></table>
+		
+		<script src="Map.js"></script>
+		<script>
+			document.getElementById('sel').selectedIndex=0;
+			function change(url){document.getElementById('img').src=url}
+		</script>
+		<link href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css" rel="stylesheet">
+		<style>input{height: auto !important;}</style>
+	</body>
+</html>

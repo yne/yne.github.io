@@ -1,0 +1,53 @@
+<html>
+	<head>
+		<title>XMLparser</title>
+	</head>
+	<body class="container-fluid">
+		<h1>Description</h1>
+		<p>
+			Minimalist (<100 line) regexp based XML parser+selector.<br/>
+			Slow (regexp) and incomplet but enought to load a xml-like file for embedded JS devices.
+			<h2>Support</h2>
+			<ul>
+				<li>short tag <i>&lt;br/&gt;</i></li>
+				<li>namespace syntax <i>&lt;ns:tag/&gt;</i></li>
+				<li>selector : <i>*</i>, <i>tag</i>, <i>[attr=val]</i>, <i>[attr]</i>, <i>&gt;</i> or <i>(space)</i> child</li>
+			</ul>
+		</p>
+		<h1>Input</h1>
+		<textarea id="input" rows="8" cols="80" class="row-fluid">
+<xml>
+	<ns:body onload="alert(\">\")">
+		<div class="test">
+			<br/>
+		</div>
+	</ns:body>
+</xml>
+		</textarea>
+		<h1>Param</h1>
+		<div>
+			Selector : <input type="text" class="row-fluid" id="selector" value="*[class]>*"/>
+		</div>
+		<div>
+			<button onclick="parse()" class="btn" type="button">select</button>
+		</div>
+		<h1>Output</h1>
+		<p>see <code>console</code> for full output</p>
+		<textarea id="output" rows="5" cols="80" class="row-fluid"></textarea>
+		
+		<script src="XMLparser.js"></script>
+		<script>
+			function parse(){
+				var input=document.getElementById('input').value.replace(/[\n\t]/g,'');
+				var xml=new XMLparser(input);
+				var ret=xml.find(document.getElementById('selector').value);
+				var output="";
+				for(var r in ret)output+=ret[r].name+'\n'
+				document.getElementById('output').value=output;
+				console.debug(ret);
+			}
+		</script>
+		<link href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css" rel="stylesheet">
+		<style>input{height: auto !important;}</style>
+	</body>
+</html>

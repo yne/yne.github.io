@@ -1,0 +1,38 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<link href="disassembler.css" rel="stylesheet">
+	<script src="prx.js"></script>
+
+	<script src="disassembler.js"></script>
+	<script src="disassembler.printer.console.js"></script>
+	<script src="disassembler.printer.html.js"></script>
+	<script src="disassembler.printer.object.js"></script>
+	<script src="disassembler.instructions.mips.js"></script>
+<head>
+<table class="disasm" id="out"></table>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script>
+var result={};
+var disasm=new Disassembler()
+    .setInstructions('mips')
+    .setProgram(new Uint32Array(prog))
+    .setPrinter('console')
+    .setPrinter('html',{id:'out'})
+    .setPrinter('object',result)
+    .disassemble();
+/* some test */
+if(location.search=='?test'){(function test(){
+    var ori_val=[],new_val=[];
+    $('.instr').each(function(i,t){ori_val.push(parseInt($(t).text(),16))});
+    $('tbody>tr').each(function(i,t){rebuild_arg([],$(t));});
+    $('.instr').each(function(i,t){new_val.push(parseInt($(t).text(),16))});
+    for(var i=0;i<ori_val.length;i++){
+			if(ori_val[i]==new_val[i])continue;
+			$('tbody>tr').eq(i).css({backgroundColor:'#FFAAAA'});
+//        console.log(i,ori_val[i],new_val[i]);
+    }
+//    
+})()}
+</script>
+</html>

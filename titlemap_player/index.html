@@ -1,0 +1,70 @@
+﻿<style>body{margin:0;}</style>
+<!--
+Description
+ Title based map viewer
+TODO
+ - use webGL
+ - 
+-->
+<script type="text/javascript" src="map.js"></script>
+<script type="text/javascript">
+var ui={
+	cnv:null,
+	ctx:null,
+	title:{img:new Image(),size:4,perLine:4},
+	pos:{x:0,y:0},
+	setPos:function(){
+		if(this.pos.y > 0)this.pos.y=0;//up
+		if(this.pos.x > 0)this.pos.x=0;//left
+		if(this.pos.y-this.cnv.height < 0-map.length<<ui.title.size)
+			this.pos.y=-((map.length<<ui.title.size)-ui.cnv.height);//down
+		if(this.pos.x-this.cnv.width < 0-map[0].length<<ui.title.size)
+			this.pos.x=-((map[0].length<<ui.title.size)-ui.cnv.width);//right
+	},
+	resize:function(w,h){
+		this.cnv.width=w;
+		this.cnv.height=h;
+		ui.setPos();
+//		ui.ctx.mozImageSmoothingEnabled=false;
+		ui.drawMap();
+	},
+	drawMap:function(){
+		if(this.drawingBusy)return;// console.debug("skip");
+		this.drawingBusy=true;
+		var sh=this.title.size;
+		var ty=(-ui.pos.y>>sh);
+		var tx=(-ui.pos.x>>sh);
+		//console.debug(ui.pos.y+":"+ui.pos.x+" | "+ty+":"+tx+" ")
+		var s=(1<<sh);
+		for(  var y=(ui.pos.y%s),_ty=ty;y<this.cnv.height;y+=s,_ty++){
+			for(var x=(ui.pos.x%s),_tx=tx;x<this.cnv.width ;x+=s,_tx++){
+				var title=map[_ty][_tx];
+				this.ctx.drawImage(this.title.img,
+					(title%s)*s,(title>>ui.title.perLine)*s, s,s,
+					x , y, s,s);
+			}
+		}
+		this.drawingBusy=false;
+	}
+}
+window.onresize = function(){ui.resize(document.body.clientWidth,document.body.clientHeight);}
+window.onkeydown = function(e){
+	var speed=16;
+	switch(e.keyCode||e.charCode){
+		case 37:ui.pos.x+=speed;break;//left
+		case 38:ui.pos.y+=speed;break;//up
+		case 39:ui.pos.x-=speed;break;//right
+		case 40:ui.pos.y-=speed;break;//down
+		default:break;
+	}
+	ui.setPos();
+	ui.drawMap();
+}
+window.onload = function() {
+	ui.cnv=document.getElementById('canvas');
+	ui.ctx=ui.cnv.getContext('2d');
+	ui.title.img.onload=onresize;
+	ui.title.img.src = 'title.png';
+};
+</script>
+<canvas id="canvas"/>

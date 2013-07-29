@@ -1,0 +1,12 @@
+<div class="container-fluid">
+<div class="row-fluid">
+	<form class="upload">
+		<input type="file" multiple onchange="Booru.upload(this.files,event)" accept="image/*">
+	</form>
+	<h3 class="muted"><abbr title="Those tags will be added to every picture in the current queue (even the already-existing server-side ones)">Associated tags :</abbr></h3>
+		<input id="addtag" type="text" autocomplete="off" data-provide="typeahead">
+	<h3 class="muted">Upload Queue :</h3>
+	<ul id="uploaded" class="unstyled"></ul>
+</div>
+</div>
+<script>Booru.getTags();</script>

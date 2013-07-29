@@ -1,0 +1,44 @@
+body{
+		font-family: 'Open Sans',Arial,Helvetica,sans-serif;
+    font-size: 1.5em;
+    text-shadow: #FFF 1px 1px 0px;
+}
+table{
+    width: 100%;
+    border-collapse: collapse;
+}
+td{
+	padding:0.125em;
+}
+.elf {
+		background: url("chrome://browser/skin/newtab/noise.png") #EEE;
+    border-radius: 3px 3px 3px 3px;
+    box-shadow: 0 1px 5px #000000;
+}
+.elf .title {
+    box-shadow: 0 5px 5px -5px #000000;
+    font-size: 1.25em;
+    text-align: center;
+}
+.elf .content{
+	padding:0.125em 1em 0.125em 1em;
+}
+.attr {
+    box-shadow: 0.45em 0 0.35em -0.45em;
+    padding-right:0.25em;
+    text-align: right;
+    width: 50%;
+}
+.value {
+		padding:0;
+    margin-left:0.25em;
+}
+.value input{
+    border:none;
+    background:none;
+    padding-left:0.25em;
+		width:100%;
+}
+.value input:focus {
+    box-shadow: 5px 0px 4px -5px inset;
+}

@@ -1,0 +1,147 @@
+<html>
+<head>
+<style>
+select,input{
+	background: inherit;
+	border: medium none;
+	color: inherit;
+	font-family: inherit;
+	font-size: inherit;
+	height: 10px;
+	padding: 0;
+}
+input{
+	width:100%;
+}
+option {
+	padding: 0 0 0 2px;
+}
+body{
+	font-family:monospace;
+	font-size:8px;
+	background:#000;
+	color:#FFF;
+}
+table{
+	border-collapse: collapse;
+	border:1px solid rgba(255,255,255,0.25);
+}
+td {
+	padding: 1px;
+	width: 18px;
+	height:8px;
+	font-size: 8px;
+	border:1px solid rgba(255,255,255,0.25);
+}
+tr:nth-child(4n+0){
+	border-bottom:2px solid rgba(255,255,255,0.5);
+}
+tr:nth-child(16n+0){
+	border-bottom:2px solid rgba(255,255,255,1);
+}
+tbody td[selected]{
+	font-weight:bold;
+}
+</style>
+<script>
+HTMLElement.prototype.$=HTMLElement.prototype.querySelector;
+HTMLElement.prototype.$$=HTMLElement.prototype.querySelectorAll;
+var $=document.firstChild.$.bind(document.firstChild);
+var $$=document.firstChild.$$.bind(document.firstChild);
+
+function buildTable(arg){
+	console.log(arg);
+	var col=arg.col?arg.col:$$("tbody tr:first-child td").length;
+	var sub=arg.sub?arg.sub:32;
+	for(var line="",c=0;c<col;c++)
+		line+='<td onclick="selectNote(this)">'+((Math.random()*100)|0)+'</td>';
+	for(var tbody="",row=0;row<32;row++)
+		tbody+="<tr>"+line+"</tr>";
+	$('tbody').innerHTML=tbody;
+}
+function keypress(event){
+	if(event.ctrlKey==true){
+		switch(String.fromCharCode(event.charCode)){
+			case 'c':copyNotes(getSelection());break;
+			case 'v':pasteNotes();break;
+			case 'x':copyNotes(getSelection());removeNotes(getSelectedNotes());break;
+			default:console.log(event);
+		}
+	}else
+	if(event.shiftKey==true){
+		console.log(event);
+	}else
+	if(event.charCode==0){
+		switch(event.keyCode){
+			case 46:removeNotes(getSelectedNotes());break;
+			default:console.log(event);
+		}
+	}else
+	console.log(event);
+}
+function getSelectedNotes(){
+	var ret=[],sel=getSelection();
+	for(var i=0;i<sel.rangeCount;i++){
+		var range=getSelection().getRangeAt(i);
+		var elem=range.commonAncestorContainer;
+		if(elem.constructor==Text)
+			ret.push(range.commonAncestorContainer.parentNode);
+		else
+			ret.push(elem.children[range.startOffset]);
+	}
+	return ret;
+}
+function removeNotes(notes){
+	notes.forEach(function(note){
+		note.innerHTML='';
+	});
+}
+var selectedNote;
+function selectNote(node){
+	var prev=$('tbody td[selected]');
+	if(prev)prev.removeAttribute('selected');
+	node.setAttribute('selected','selected');
+	selectedNote=node;
+}
+var clipboard={};
+function copyNotes(notes){
+	clipboard.type="notes";
+	clipboard.notes=""+notes;
+}
+function pasteNotes(){
+	if(clipboard.type!="notes")return;
+	var target=$('tbody td[selected]');//todo [:active] only
+	var notes=clipboard.notes.replace(/\r/g,'').split(/\n/).map(function(r){return r.split(/\t/)});
+	var col=Array.apply(null,target.parentNode.$$('td')).indexOf(target);
+	for(var l=0,pos=target;l<notes.length;l++){
+		for(var c=0;c<notes[0].length;c++,pos=pos.nextSibling){
+			if(pos==null)break;//table overflow
+			pos.innerHTML=notes[l][c];
+		}
+		if(target.parentNode.nextSibling==null)break;//table overflow
+		target=target.parentNode.nextSibling.children[0];//goto nextline
+		pos=target;
+		for(var i=0;i<col;i++){pos=pos.nextSibling;}//pos
+	}
+}
+</script>
+</head>
+<body onkeypress="keypress(event)">
+	<table>
+		<thead><tr><td colspan="99"><button onclick="extendTable()">add row</button></td></tr></thead>
+		<tbody></tbody>
+		<tfoot><tr><td colspan="99">
+			<select title="layout" onchange="buildTable({col:this.value})">
+				<option value="5">5k</option>
+				<option value="7">7k</option>
+				<option value="14">14k</option>
+			</select>
+			<select title="divide" onchange="buildTable({sub:this.value})"><option>1<option>2<option>4<option>16<option>32</select>
+			<input title="bpm">
+			<input title="artist">
+			<input title="title">
+		</td></tr></tfoot>
+	</table>
+<script>buildTable({col:7});</script>
+</body>
+</html>
