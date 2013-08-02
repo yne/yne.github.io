@@ -1,0 +1,9 @@
+<script src="MP4AtomReader.js"></script>
+<script src="MP4Builder.js"></script>
+<script src="MP4Parser.js"></script>
+<script src="MP4File.js"></script>
+<input type="file" onchange="
+	var fr=new FileReader();
+	fr.onload=function(){mp4=new MP4File(new Uint8Array(this.result));};
+	fr.readAsArrayBuffer(this.files[0]);
+">
