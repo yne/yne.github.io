@@ -61,15 +61,18 @@ var gui={
 		});
 		return false;
 	},
-	ls:function(a){
+	ls:function(a,cb){
 		var $ul=$(a).parent().find('ul');
-		if($ul.find('li').length)//already open -> clear
-			return $ul.empty();
+		if($ul.find('li').length){//already opened
+			if(cb)return cb($ul);//internal browse : keep
+			return $ul.empty();//human clic : clear content
+		}
 		$(a).addClass('loading');
 		sys.ls(a.title,function(list,json){
 			$(a).removeClass('loading');
 			if(json.status!=undefined)return gui.warning('bad server response');
 			gui.entry($ul,list,a.title);
+			if(cb)cb($ul);
 		});
 	},
 	entry:function($ul,list,dir){
@@ -101,42 +104,22 @@ var gui={
 		gui['playnext_'+$('#player select').val()]();
 	},
 	playnext_folder:function(){
-		
+		gui.$target.parent().next().find('a').click();
 	},
 	playnext_shuffle:function(){
-		
+		function digg($ul){
+			$dirs=$ul.children('li.type_dir');
+			if($dirs.length)
+				gui.ls($dirs.eq((Math.random()*$dirs.length)|0).find('a')[0],digg);
+			else if($ul.find('li').length){
+				var $files=$ul.find('li.type_file>a');
+				$files.eq((Math.random()*$files.length)|0).click();
+			}else playnext_shuffle();//the final directory was empty
+		}
+		digg($('#root'))
 	},
 	playnext_available:function(){
-		var $files=$('li .type_file a');
+		var $files=$('li.type_file>a');
 		$files.eq((Math.random()*$files.length)|0).click();
 	}
 }
-/* PLAYBACK EVENTS ORDER : OK
-ratechange
-play
-waiting
-loadstart
-progress
-durationchange
-loadedmetadata
-loadeddata
-canplay
-canplaythrough
-__
-progress
-timeupdate
-__
-pause
-timeupdate
-ended
-
-PLAYBACK EVENTS ORDER: ERROR
-abort
-emptied
-timeupdate
-ratechange
-play
-waiting
-loadstart
-error
-*/
