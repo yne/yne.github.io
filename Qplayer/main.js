@@ -5,7 +5,7 @@ var sys={
 	login:function(credential,cb){
 		$.post('/cgi-bin/filemanager/wfm2Login.cgi',{
 			user:credential.user,
-			pwd:ezEncode(credential.pwd),
+			pwd:ezEncode(credential.pwd)
 		},function(obj){
 			sys.session=obj;
 			if(cb)cb(obj);
@@ -43,50 +43,56 @@ var sys={
 		audio.setAttribute('onAbort',end_cb);
 		audio.play();
 	}
-}
+};
 var gui={
 	warning:function(msg){
 		console.log(msg);
 	},
 	login:function(form){
-		$(form).find('[type=submit]').attr('disabled',true);
+		//$(form).find('[type=submit]').attr('disabled',true);
 		sys.login({
-			user:$(form).find('[name=user]').val(),
-			pwd :$(form).find('[name=pwd]').val(),
+			user:'guest',//$(form).find('[name=user]').val(),
+			pwd :''//$(form).find('[name=pwd]').val(),
 		},function(obj){
-			$(form).find('[type=submit]')
-				.attr('disabled',false);
-			if(!obj.sid)gui.warning('no SID returned ! (bad user/pwd?)')
-			else $(form).hide();
+			//$(form).find('[type=submit]').attr('disabled',false);
+			if(!obj.sid)
+				gui.warning('no SID returned ! (bad user/pwd?)');
+			//else $(form).hide();
 		});
 		return false;
 	},
 	ls:function(a,cb){
 		var $ul=$(a).parent().find('ul');
-		if($ul.find('li').length){//already opened
-			if(cb)return cb($ul);//internal browse : keep
-			return $ul.empty();//human clic : clear content
-		}
+		if(cb &&$ul.find('li').length)return cb($ul);//already opened
 		$(a).addClass('loading');
-		sys.ls(a.title,function(list,json){
+		var path=$(a).attr('href').substr(1);
+		sys.ls(path,function(list,json){
 			$(a).removeClass('loading');
-			if(json.status!=undefined)return gui.warning('bad server response');
-			gui.entry($ul,list,a.title);
+			if(json.status!==undefined)
+				return gui.warning('bad server response');
+			gui.entry($ul,list,path);
 			if(cb)cb($ul);
 		});
 	},
 	entry:function($ul,list,dir){
 		(list||[]).forEach(function(entry){
-			var isfile=(entry.isfolder!=undefined&&entry.isfolder==0);
-			var title=entry.id!=undefined?entry.id:entry.filename;
-			var name=entry.text!=undefined?entry.text:entry.filename;
-			$ul.append('<li class="type_'+(isfile?'file':'dir')+'"><a onclick="gui.'+(isfile?'play':'ls')+
-				'(this)" title="'+dir+title+(isfile?'':'/')+'">'+name+'</a><ul></ul></li>');
+			var isfile=(entry.isfolder!==undefined&&entry.isfolder===0);
+			var title=entry.id!==undefined?entry.id:entry.filename;
+			var name=entry.text!==undefined?entry.text:entry.filename;
+			$ul.append('<li class="type_'+(isfile?'file':'dir')+'"><a '+
+				(!isfile?'onclick="gui.entry_toggle(event,this)"':'')+
+				' href="#'+dir+title+(isfile?'':'/')+'">'+name+'</a><ul></ul></li>');
 		});
+	},
+	entry_toggle:function(event,a){
+		if($('>ul>li',$(a).parent()).length){
+			$('>ul',$(a).parent()).empty();
+			event.preventDefault();//avoid hash change
+		}
 	},
 	play:function(a){
 		gui.$target=$(a).addClass('playing');
-		var url=a.title.replace(/&/g,'%26');
+		var url=$(a).attr('href').substr(1).replace(/&/g,'%26');
 		document.title=url.substring(url.lastIndexOf('/')+1,url.lastIndexOf('.'));
 		sys.play(url,'gui.onplay_start()','gui.onplay_next()','gui.onplay_end()');
 	},
@@ -101,25 +107,47 @@ var gui={
 		gui.playnext();
 	},
 	playnext:function(){
+		//audio.stop();
 		gui['playnext_'+$('#player select').val()]();
 	},
 	playnext_folder:function(){
-		gui.$target.parent().next().find('a').click();
+		var a=gui.$target.parent().next().find('a')[0];
+		if(a)a.click();
 	},
 	playnext_shuffle:function(){
-		function digg($ul){
-			$dirs=$ul.children('li.type_dir');
-			if($dirs.length)
-				gui.ls($dirs.eq((Math.random()*$dirs.length)|0).find('a')[0],digg);
-			else if($ul.find('li').length){
-				var $files=$ul.find('li.type_file>a');
-				$files.eq((Math.random()*$files.length)|0).click();
+		function dig($ul){
+			$dirs=$('>li.type_dir',$ul);
+			if($dirs.length){
+				gui.ls($dirs.eq((Math.random()*$dirs.length)|0).find('a')[0],dig);
+			}else if($ul.find('li').length){
+				var $files=$('>li.type_file>a',$ul);
+				var a=$files.eq((Math.random()*$files.length)|0)[0];
+				if(a)a.click();
 			}else playnext_shuffle();//the final directory was empty
 		}
-		digg($('#root'))
+		dig($('#root'));
 	},
 	playnext_available:function(){
 		var $files=$('li.type_file>a');
-		$files.eq((Math.random()*$files.length)|0).click();
+		var a=$files.eq((Math.random()*$files.length)|0)[0];
+		if(a)a.click();
+	},
+	playnext_none:function(){},
+	dig:function(dir_list,$ul){
+		var file=dir_list.shift();
+		var $a=$('>li>a:contains("'+file+'")',$ul);
+		if(file==="")//directory reached
+			return;
+		if(!$a.length)//dir not found : may be a hidden directory (ex. "/Multimedia" when tree start at /Multimedia/)
+			return gui.dig(dir_list,$ul);
+		if($a.parent().hasClass('type_dir'))
+			return gui.ls($a[0],function(){gui.dig(dir_list,$('>ul',$a.parent()));});
+		if($a.parent().hasClass('type_file'))
+			return gui.play($a[0]);
 	}
-}
+};
+window.onhashchange=function(){
+	var hash=document.location.hash.substr(2);
+	if(hash)
+		gui.dig(hash.split('/'),$('#root'));
+};
