@@ -14,14 +14,14 @@ Dependency
 QPlayer us the filemanager API so it will not work if you deactivated the QNAP's file manager.
 QPlayer rely on the "guest" user to retrieve directories and file contents.
 It mean that, by default, only public directories can be browsed and played.
-You can use your own credentials by removing the commented <form> and the commented lines in the gui.login function.
+You can use your own credentials by removing the commented `<form>` and the commented lines in the gui.login function.
 
 Features
 ------------
 You can change the default start folder (mine is /Multimedia/MUSIC) to "" if you want to browse from the root of the /shared/ folder
 MP3 playing rely on Flash if used from XP (Firefox doesn't provide it under XP)
 So XP will not be able to play ogg file (since flash don't support it)
-To disable this feature, comment the <script src="flash.js"> from the .html
+To disable this feature, comment the `<script src="flash.js">` from the .html
 Responsive browsing :
 * italic : loading
 * bold : selected
@@ -35,7 +35,7 @@ Playback systems
 
 Hash Driven Navigation
 -------------------------------
-files and directories are just <a href="#path">
+files and directories are just `<a href="#path">`
 so you can : 
 * send a link to the currently played file by copy/pasting the current URL
 * changing the URL lead to a view change (to match the URL's path)
