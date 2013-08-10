@@ -1,0 +1,49 @@
+<html>
+<head>
+	<style>
+		a{cursor:pointer;}
+		ul{padding-left: 1em;margin: 0;}
+		.type_dir {list-style:disc;}
+		.type_file{list-style:none;}
+		.loading{font-style : italic;opacity:0.5;}
+		.playing{font-style : italic;}
+		.play{font-weight:bold;}
+		#player{
+			position: fixed;
+			right: 0;top: 0;padding:5px;
+			background:rgba(0,0,0,0.125);
+			border-radius:0 0 0 5px;
+			box-shadow: 1px 1px 3px inset;
+		}
+		#player pre{margin:0;}
+	</style>
+	<script src="//code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+	<script>Ext={ux:{}};//context for the next script (password hashing utility)</script>
+	<script src="/cgi-bin/filemanager/lib/wfm_common.js" type="text/javascript"></script>
+	<script src="main.js"></script>
+	<script src="flash.js"></script>
+</head>
+<body>
+	<form id="login" onsubmit="return gui.login(this);">
+		<input name="user" placeholder="username">
+		<input name="pwd"  placeholder="password" type="password">
+		<input type="submit" value="Login">
+	</form>
+	<div id="player">
+		<select title="Next song method">
+			<option value="available" title="pick a random song from those currently displayed">shuffle available</option>
+			<option value="folder"  title="pick the next song in the current played folder">next in folder</option>
+			<option value="shuffle" title="pick a random song from a random folder">pure shuffle !</option>
+		</select>
+		<button title="play/pause" onclick="audio.paused?audio.play():audio.pause()">|| / &#9654;</button>
+		<button title="next file" onclick="gui.onplay_next()">&#8594;</button>
+	</div>
+	<ul id="root"></ul>
+	<script>
+		audio=new Player();
+		//for(var i in audio)if(i.substr(0,2)=='on')audio[i]=console.log;
+		sys.login({user:'guest',pwd:''},function(){$('#login').hide();});
+		gui.entry($('ul#root'),[{text:'MUSIC',id:'MUSIC'}],'/Multimedia/');
+	</script>
+</body>
+</html>
