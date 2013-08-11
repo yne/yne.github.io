@@ -29,7 +29,7 @@ Responsive browsing :
 Playback systems
 --------------------------
 * pure shuffle : shuffle the whole root folder
-* available shuffle : shuffle from opened folder
+* available shuffle : shuffle from opened folders
 * next : play the next file in the current folder (no subfolder !)
 * none : do nothing
 
@@ -45,8 +45,4 @@ It mean :
 
 TODO
 -------
-* store the mode into localstorage
-* if expired token : re-log automatically
-* Use the filename extension to switch between flash and html5
-* User a JS decoder (MadJS) or a Flash/HTML5 glue lib
-* display warnings in a popup (and not in the console)
+* Use the filename extension to switch between flash and html5 on XP

@@ -45,10 +45,22 @@ var sys={
 	}
 };
 var gui={
-	warning:function(msg){
-		console.log(msg);
+	init:function(msg){
+		window.onhashchange=function(){
+			var hash=document.location.hash.substr(2);
+			if(hash)
+				gui.dig(hash.split('/'),$('#root'));
+		};
+		$('#player [name=mode]').val(localStorage.mode);
+		window.audio=new Player();
+		//for(var i in audio)if(i.substr(0,2)=='on')audio[i]=console.log;
+		sys.login({user:'guest',pwd:''},function(){window.onhashchange();});
+		gui.entry($('ul#root'),[{text:'MUSIC',id:'MUSIC'}],'/Multimedia/');
 	},
-	login:function(form){
+	warning:function(msg){
+		$('<div class="warning">'+msg+'</div>').appendTo('body').fadeOut(0).fadeIn(1000).fadeOut(5000,function(){$(this).remove()});
+	},
+	login:function(form,cb){
 		//$(form).find('[type=submit]').attr('disabled',true);
 		sys.login({
 			user:'guest',//$(form).find('[name=user]').val(),
@@ -56,8 +68,9 @@ var gui={
 		},function(obj){
 			//$(form).find('[type=submit]').attr('disabled',false);
 			if(!obj.sid)
-				gui.warning('no SID returned ! (bad user/pwd?)');
+				return gui.warning('no SID returned ! (bad user/pwd?)');
 			//else $(form).hide();
+			if(cb)cb(obj);
 		});
 		return false;
 	},
@@ -68,8 +81,12 @@ var gui={
 		var path=$(a).attr('href').substr(1);
 		sys.ls(path,function(list,json){
 			$(a).removeClass('loading');
-			if(json.status!==undefined)
-				return gui.warning('bad server response');
+			if(json.status!==undefined){
+				if(json.status==3)
+					return gui.login(null,gui.ls.bind(this,a,cb));
+				else
+					return gui.warning('bad server response');
+			}
 			gui.entry($ul,list,path);
 			if(cb)cb($ul);
 		});
@@ -145,9 +162,4 @@ var gui={
 		if($a.parent().hasClass('type_file'))
 			return gui.play($a[0]);
 	}
-};
-window.onhashchange=function(){
-	var hash=document.location.hash.substr(2);
-	if(hash)
-		gui.dig(hash.split('/'),$('#root'));
 };
