@@ -25,7 +25,7 @@ var Postit={
 				//for each collumn
 					//update postit id/class
 	},
-}
+};
 ["TODO","pending","done","tested"].forEach(function(title){//create postits
 	var formated = title.toLowerCase().replace(/\s/g,'');
 	$('#planning>thead>tr').append('<th>'+title+'</th>');
