@@ -5,15 +5,15 @@
 AZERTYUIOP'
 1234567890.
 azertyuiop"
-
+1234567890.
 QSDFGHJKLM%
 @é{([])}^&`
 qsdfghjklm$*
-
+@é{([])}^&`
 >WXCVBN?./_
 ~#  |+-!=\^
 <wxcvbn,;:
-
+~#  |+-!=\^
 </textarea>
 <textarea id="out" rows="12" cols="80" title="output" spellcheck="false"></textarea>
 <script>
@@ -41,13 +41,13 @@ function getKeyCoord(event){
 }
 
 out.onkeypress=function(event){
-	var alt=event.ctrlKey?1:0;
+	var alt=(event.ctrlKey||event.altKey)?1:0;
 	var c=getCharAtCoord(getKeyCoord(event),alt);
 	if(c==undefined||c==' '){
 		console.log(event);
 		if(event.keyCode==0){
-			event.preventDefault();
-			event.stopPropagation();
+//			event.preventDefault();
+//			event.stopPropagation();
 			return;
 		}else{
 			return;
