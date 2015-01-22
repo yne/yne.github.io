@@ -1,0 +1,26 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<script>
+	function float2bin(f){
+		var S=f<0?1:0;
+		f=f<0?-f:f;
+		//find the mantisa
+		var m_lo='',m_hi=(f|0).toString(2);
+		for(var i=0,m_tmp=(f%1);i<24;i++){
+			m_lo+=(m_tmp*2)|0;
+			m_tmp=(m_tmp*2)%1;
+		}
+		var M=(m_hi+m_lo).slice(1,24);
+		//now find the exponent
+		var E=(m_hi.length-1 + 127).toString(2);
+		return S+E+M;
+	}
+</script>
+</head>
+<body>
+	<button onclick="alert(float2bin(prompt('float:')));">float2bin</button>
+	<button onclick="alert((+prompt('dec:')).toString(2));">dec2bin</button>
+	<button onclick="alert(Number.parseInt(prompt('bin:'),2));">bin2dec</button>
+</body>
+</html>
