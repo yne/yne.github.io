@@ -2,52 +2,29 @@
 <head>
 <meta charset="utf8">
 <script>
-var magic=[
-	[[ 73, 68, 51        ],"mp3"],
-	[[ 71, 73, 70, 56, 57],"gif"],
-	[[137, 80, 78, 71    ],"png"],
-	[[ 79,103,103, 83    ],"ogg"],
-	[[255,216,255,224    ],"jpg"],
-	[[ 66, 77, 54,120    ],"bmp"],
-	[[ 68, 68, 83, 32    ],"dds"],
-	[[ 60, 63,120,109    ],"xml"],
-	//sony related
-	[[126,80,83,80       ],'prx'],
-	[[0x00,0x50,0x52,0x46],'rco'],
-	[[83,67,69,0         ],'self'],
-	//Sony game ressources
-	[[0x52,0x49,0x46,0x46],".at3"],
-	[[0x50,0x54,0x46,0x46],".pt" ],
-	[[0x50,0x53,0x4d,0x46],".pmf"],
-	[[0x4d,0x49,0x47,0x2e],".gim"],
-];
+var $ =document.querySelector.bind(document);
+var $$=document.querySelectorAll.bind(document);
 
-$=document.querySelector.bind(document);
-$$=document.querySelectorAll.bind(document);
-function memcmp(buffer,pos,token){
-	for(var i=0;i<token[0].length;i++)
-		if(token[0][i]!=buffer[pos+i])return;
-	return token[1];
-}
-function findFiles(){
+var worker = new Worker("worker.js");
+worker.onmessage=function(arg){
+	var type=arg.data[0],data=arg.data[1];
+	switch(type){
+		case 'progress':$('#progress').value=+data;break;
+		case 'result':$('#files').innerHTML+='<li><a href="'+data.href+'">'+data.name+'.'+data.type+'</a></li>';break;
+		default:;
+	}
+};
+
+function loadFiles(){
 	var reader = new FileReader();
-	reader.onloadend = function(){
-		var f,files=[],u8=new Uint8Array(this.result);
-		for(var i=0;i<u8.length;i++)
-			magic.forEach(function(m){
-				if(f=memcmp(u8,i,m))files.push({type:f,pos:i});
-			})
-		$('#files').innerHTML=files.map(function(c,i,a){
-			var href=URL.createObjectURL(new Blob([u8.subarray(a[i].pos,(a[i+1]?a[i+1].pos:u8.length)-1)]));
-			return '<li><a href="'+href+'">'+(c.pos.toString(16)+'.'+c.type)+'</li>'
-		}).join('');
-	};
+	reader.onloadend = function(){worker.postMessage(this.result)};
 	reader.readAsArrayBuffer($('[type=file]').files[0]);
 }
 </script>
 </head>
 <body>
-	<form onsubmit="findFiles()"><input type="file" onchange="findFiles()"></form>
+	<form onsubmit="loadFiles()"><input type="file" onchange="loadFiles()"></form>
+	<progress id="progress" value="0" max="1">60%</progress>
 	<ul id="files">
 	</ul>
 </body>
