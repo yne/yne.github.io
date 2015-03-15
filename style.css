@@ -44,6 +44,7 @@ ul{
 }
 .bloc .desc{
 	display: block;
+	font-size: 1em;
 }
 .bloc .date{
 	position: absolute;
@@ -54,4 +55,15 @@ ul{
 	position: absolute;
 	right: 1em;
 	bottom : 1em;
+}
+
+@media screen and (max-width: 640px) {
+	.bloc .name{font-size: 1em;}
+	.bloc .desc,.bloc .date,.bloc .lang{font-size: .5em;}
+	.bloc {
+		width: 7em;
+		height: 3em;
+		margin: .5em;
+		padding: 0em .5em 1.5em;
+	}
 }
