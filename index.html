@@ -14,11 +14,14 @@
 			$('#repos').html([].concat(repos,contents)
 				.filter(function(a){return !(a.type&&a.type!='dir')})
 				.sort(function(a,b){return b.name.toLowerCase()<a.name.toLowerCase();})
-				.map(function(bloc){return '<li class="bloc '+(bloc.type?'app':'repo')+'">'+
-					'<div class="name"><a href="'+(bloc.type?bloc.path:bloc.html_url)+'">'+(bloc.full_name||'/'+bloc.name).split('/').slice(1)+'</a></div>'+
+				.map(function(bloc){
+				var isweb=(bloc.default_branch=='gh-pages')||bloc.type;
+				console.log(bloc.name,isweb)
+				return '<li class="bloc '+(isweb?'app':'repo')+'">'+
+					'<div class="name"><a href="'+(isweb?bloc.name:bloc.html_url)+'">'+(bloc.full_name||'/'+bloc.name).split('/').slice(1)+'</a></div>'+
 					'<div class="desc"><div class="desc_">'+(bloc.description||'')+'</div></div>'+
-					'<div class="date">'+(bloc.type?'':(new Date(bloc.updated_at)).toLocaleDateString()||'')+'</div>'+
-					'<div class="lang">'+(bloc.type?'webapp':bloc.language||'')+'</div>'+
+					'<div class="date">'+(bloc.updated_at?(new Date(bloc.updated_at)).toLocaleDateString():'')+'</div>'+
+					'<div class="lang">'+(bloc.language||'web')+'</div>'+
 				'</li>';}));
 		};
 		$('#repos').html('<div class="wait">Loading...</div>');
