@@ -1,60 +1,39 @@
-<style>
-body{
-	background-color: #222;
-	color: #DDD;
-	font-family: Sans-serif;
-}
-#stdout{
-	font-family: monospace;
-	background-color: #000;
-	color: #FFF;
-	padding: 5px;
-	position: fixed;
-	right: 0;
-	top: 0;
-	z-index: 999;
-}
-#chart_div{
-}
-</style>
+<!doctype HTML>
+<html>
+<head>
+<meta charset="UTF8">
 <script>
 var g_limit=1.5;
-function print(str){
-	stdout.innerHTML=str;
-}
 var result_n=0;
 function resultReset(){
 	result_out.value='';
 	result_n=0;
 }
 function result(str){
-//	console.log(str);
-	result_out.value=result_out.value+'\n'+result_n.toString(16)+"@"+str;
+	result_out.value=result_out.value+','/*+result_n.toString(16)+"@"*/+str;
 	result_n++;
 }
-function ReadFile(f,cb){
-	var reader = new FileReader();
-	reader.onload = function(a){
+function load(param){
+	var loader = new (param.constructor==String?XMLHttpRequest:FileReader)();
+	loader.onload = function(ev){
 		try{
-			eval("window.file="+a.target.result);
-			print("File loaded");
-			
-			//displayInputGraph(window.file,1000,null);
-			//displayGraph(window.file,100,2800,112000,frontDetector)
-			
+			eval("window.file="+(ev.target.result||ev.target.response));
+			document.getElementById('result').hidden=false
 		}catch(e){
-			print("Error l:"+e.lineNumber+" c:"+e.columnNumber+" : "+e.message);
+			alert("Error l:"+e.lineNumber+" c:"+e.columnNumber+" : "+e.message);
 		}
 	}
-	reader.readAsText(f);
+	if(loader.constructor==XMLHttpRequest)
+		loader.open("GET",param),loader.send();
+	else
+		loader.readAsText(f);
 }
-function delta(array,at,size){return Math.abs(array[at]-(array[at-size]/2)-(array[at+size]/2));}
-function frontDetector(array,at,size){return 100*((Math.abs(array[at]-(array[at-(size)]/2)-(array[at+(size)]/2)))>g_limit);}
-var GraphOptions = {
-	backgroundColor:"#222",
-	hAxis: {textStyle:{color:"#DDD"},title: 'sample'},
-	vAxis: {textStyle:{color:"#DDD"},viewWindow:{min:0x00,max:0xFF}}
-};
+function delta(array,at,size){
+	return Math.abs(array[at]-(array[at-size]/2)-(array[at+size]/2));
+}
+function frontDetector(array,at,size){
+	return 100*((Math.abs(array[at]-(array[at-(size)]/2)-(array[at+(size)]/2)))>g_limit);
+}
 function displayGraph(file,precision,from,to,extra,dump){
 	var table=[['sample','chan:1','delta:1']];
 	for(var i=from;i<to;i+=precision){
@@ -64,7 +43,7 @@ function displayGraph(file,precision,from,to,extra,dump){
 		getEdgeSpace(table,dump);
 	}
 	if(!dump)
-		new google.visualization.AreaChart(document.getElementById('chart')).draw(google.visualization.arrayToDataTable(table), GraphOptions);
+		new google.visualization.AreaChart(document.getElementById('chart')).draw(google.visualization.arrayToDataTable(table),{});
 }
 function displayInputGraph(file,precision,extra){
 	var table=[['sample','chan:1']];
@@ -75,7 +54,7 @@ function displayInputGraph(file,precision,extra){
 		else
 			table.push([i,file.Data[0][i]]);
 	}
-	new google.visualization.AreaChart(document.getElementById('overview')).draw(google.visualization.arrayToDataTable(table), GraphOptions);
+	new google.visualization.AreaChart(document.getElementById('overview')).draw(google.visualization.arrayToDataTable(table),{});
 }
 function getEdgeSpace(table,dump){
 	var prev_val=-1,prev_pos=table[1][2];
@@ -102,32 +81,42 @@ function valueToData(val,min,max,size){
 	return Math.round(((val-min)/(max-min))*size);
 }
 </script>
-<output id="stdout"></output>
-<h1>Input</h1>
-<input type="file" onchange="ReadFile(event.target.files[0])"/>
+</head>
+<body>
+	<h1>About</h1>
+	<p>
+		Convert an analogic signal dump to it hex numeric equivalent
+		
+	</p>
+	<h1>Input</h1>
+	<button onclick="load('data.increment.js')">increment</button>
+	<button onclick="load('data.signal.js')">signal</button>
+	<input type="file" onchange="load(event.target.files[0])"/>
 
-<h1>Overview <button onclick="displayInputGraph(window.file,1000,null)">see</button></h1>
-<div id="overview"></div>
-<h1>Signal processing</h1>
-<h3>Edge detect</h3>
-<input id="g_limit" onchange="g_limit=1*this.value" value="1.5"/>
-<h3>Viewbow</h3>
-<input type="number" title="preci" id="prec"  value="100"/>
-<input type="number" title="start" id="start" value="2800"/>
-<input type="number" title="end"   id="end"   value="112000"/>
+	<h1>Overview <button onclick="displayInputGraph(window.file,1000,null)">see</button></h1>
+	<div id="overview"></div>
+	<h1>Signal processing</h1>
+	<h3>Edge detect</h3>
+	<input id="g_limit" onchange="g_limit=1*this.value" value="1.5"/>
+	<h3>Viewbow</h3>
+	<input type="number" title="preci" id="prec"  value="100"/>
+	<input type="number" title="start" id="start" value="2800"/>
+	<input type="number" title="end"   id="end"   value="112000"/>
 
-<h1>
-	Result
-	<button onclick="displayGraph(window.file,1*prec.value,1*start.value,1*end.value,frontDetector)">preview</button>
-	<button onclick="resultReset();displayGraph(window.file,1*prec.value,0,file.Data[0].length,frontDetector,result)">dump</button>
-</h1>
-<div id="chart"></div>
-<textarea id="result_out"></textarea>
-<script type="text/javascript" src="https://www.google.com/jsapi"></script>
-<script>
-google.load("visualization", "1", {packages:["corechart"]});
-google.setOnLoadCallback(function(){
-	print("Graph library loaded");
-});
-g_limit=document.getElementById("g_limit").value;
-</script>
+	<h1>
+		Result
+		<span id="result" hidden>
+		<button onclick="              displayGraph(window.file,1*prec.value,1*start.value,1*end.value,frontDetector)" id="preview" disabled>preview</button>
+		<button onclick="resultReset();displayGraph(window.file,1*prec.value,0,file.Data[0].length,frontDetector,result)">dump</button>
+		</span>
+	</h1>
+	<div id="chart"></div>
+	<textarea style="width:100%" id="result_out"></textarea>
+	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+	<script>
+	google.load("visualization", "1", {packages:["corechart"]});
+	google.setOnLoadCallback(function(){document.getElementById('preview').disabled=false});
+	g_limit=document.getElementById("g_limit").value;
+	</script>
+</body>
+</html>

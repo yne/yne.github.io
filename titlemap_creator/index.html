@@ -6,7 +6,7 @@
 	</head>
 	<body class="container-fluid">
 		<h1>Description</h1>
-		<p>Create a title index array (the map) and it corresponding title list from the map image.
+		<p>Create a title index array (the map) and it corresponding title list from the map image.</p>
 		<h2>TODO</h2>
 		<ul>
 			<li>Missalignement error resilience</li>
@@ -15,14 +15,13 @@
 			<li>Title replacing</li>
 			<li>Optimized algorithm ?!</li>
 		</ul>
-		</p>
 		<h1>Input</h1>
 		<label><select id="sel" onchange="if(this.value)change(this.value)">
 			<option value="">select a map</option>
 			<option value="zelda-snes-sample.png">zelda (snes) sample</option>
 			<option value="zelda-gbc.png">zelda (gbc)</option>
-			<option value="zelda-snes.png">zelda (snes)</option>
-			<option value="golden-sun2.png">golden sun 2 (gba)</option>
+			<!--<option value="zelda-snes.png">zelda (snes)</option>-->
+			<!--<option value="golden-sun2.png">golden sun 2 (gba)</option>-->
 		</select></label>
 		<img id="img"/>
 		<h1>Param</h1>
@@ -45,7 +44,6 @@
 			document.getElementById('sel').selectedIndex=0;
 			function change(url){document.getElementById('img').src=url}
 		</script>
-		<link href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css" rel="stylesheet">
 		<style>input{height: auto !important;}</style>
 	</body>
 </html>
