@@ -1,65 +1,66 @@
 ﻿<html>
 <head>
+<meta charset="utf8">
+<meta content="width=device-width, user-scalable=no" name="viewport"/>
 <script>
-var tab_hd=[
-0,0,6, 4,1,0, 3,2,9,
-0,0,0, 0,0,0, 0,0,0,
-0,0,1, 3,0,7, 8,0,5,
-
-0,0,0, 0,0,1, 9,0,0,
-3,0,8, 9,0,5, 0,0,4,
-0,0,9, 6,0,0, 0,0,0,
-
-6,8,3, 7,0,4, 2,0,0,
-0,5,0, 0,0,0, 0,0,0,
-1,9,4, 0,6,2, 7,0,0,
-];
-var tab_md=[
-0,7,0, 3,0,2, 4,6,0,
-6,2,9, 0,4,1, 0,8,3,
-5,4,0, 6,8,0, 7,0,1,
-
-3,6,0, 9,7,4, 8,0,2,
-9,5,0, 0,2,0, 0,1,4,
-4,0,2, 5,1,6, 0,3,7,
-
-7,0,5, 0,9,8, 0,4,6,
-2,9,0, 1,6,0, 3,7,8,
-0,1,6, 4,0,7, 0,9,0,
-];
-var tab_ez=[
-5,3,1, 6,0,9, 0,7,4,
-7,0,9, 0,5,2, 0,1,8,
-4,2,8, 3,1,7, 6,5,9,
-
-9,4,2, 7,0,1, 8,3,5,
-0,1,0, 8,0,5, 0,2,0,
-8,5,7, 2,0,3, 1,9,6,
-
-6,9,3, 5,2,8, 7,4,1,
-1,7,0, 9,3,0, 5,0,2,
-2,8,0, 1,0,4, 9,6,3,
-];
-//optional
-function prepare(grid){
-	return grid.map(function(cell){
-		if(cell.constructor==Array)return cell;
-		return cell?[cell]:[1,2,3,4,5,6,7,8,9];//(Array(9)).fill().map(function(a,i){return i+1})
-	});
+$$=function(sel){return [].slice.call(document.querySelectorAll(sel))}
+function formSolve(){
+	var grid=(new Grid($$('input').map(function(e){return +e.value}))).solve();
+	$$('input').forEach(function(input,i){
+		input.title=grid.grid[i];
+		if(grid.grid[i].length==1)input.value=grid.grid[i][0]
+	})
 }
-function toString(grid){
-	return grid.map(function(c,i){
-		return (i%9?'':'\n')+(i%27?'':'\n')+(i%3?'':' ')+c.join('')}).join('');
+function makeForm(){
+	var form=""
+	for(var i=0;i<9*9;i++)
+		form+=(i%9?'':'<tr>')+'<td><input type="number" onkeyup="formSolve()"></td>'+((i+1)%9?'':'</tr>')
+	document.forms[0].innerHTML='<table>'+form+'</table>';
 }
-function toHTML(grid){
-	return '<table border=1><tr>'+grid.map(function(c,i){
-		return (i%9?'':'</tr><tr>')+'<td title="'+i+':'+c.join('')+'">'+
-			(c.length==1?c:'.')+'</td>'}).join('')+'</tr></table>';
+function Grid(grid){
+	this.grid=[];
+	for(var i=0;i<9*9;i++)
+		this.grid[i]=grid[i]?[grid[i]]:[1,2,3,4,5,6,7,8,9]//0 mean every possibilities
+	this.solve=function(){
+		var minus=function(array,vals){
+			return (vals.constructor==Array?vals:[vals]).forEach(function(val){
+				var i=array.indexOf(val);
+				if(i!=-1)array.splice(i,1);
+			});
+		}
+		for(var prev_str;JSON.stringify(this.grid) != prev_str;){
+			prev_str=JSON.stringify(this.grid);//backup
+			this.grid=this.grid.map(function(possibilities,p){
+				if(possibilities.length==1)return possibilities;//already solved
+				var exclu=possibilities.slice();//will lose non exclusives one
+				for(var i=0;i<9;i++){
+					[(p-(p%9))+i,(p%9)+(i*9),(p-p%27)+(p-p%3)%9 + (i%3)+(0|i/3)*9]
+					.forEach(function(pos,b,a){//foreach rows,collumns,blocs
+						if(pos==p)return;//we don't compute ourself
+						//remove existing solved blocs from possibilities
+						if(this.grid[pos].length==1)
+							minus(possibilities,this.grid[pos]);
+						//check if i'm the only one to hold a possibility
+						minus(exclu,this.grid[pos]);
+					},this)
+				}
+				return exclu.length==1?exclu:possibilities;
+			},this);
+		}
+		return this;
+	}
 }
 </script>
-<script src="solver.js"></script>
+<style>
+	*{margin:0;padding:0;}
+	table{width:100%;height:100%;border-spacing:0;}
+	td{border:1px solid #DDD;}
+	td:nth-child(3n){border-right:2px solid #000;}
+	tr:nth-child(3n) td{border-bottom:2px solid #000;}
+	input{width:100%;height:100%;font-size:2em;border:none;text-align: center;}
+</style>
 </head>
-<body onload="code.innerHTML=toHTML(solve(prepare(tab_hd)));">
-	<code id="code"></code>
+<body onload="makeForm()">
+<form onsubmit="formSolve();return false;"></form>
 </body>
 </html>

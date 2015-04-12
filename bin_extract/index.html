@@ -5,26 +5,70 @@
 var $ =document.querySelector.bind(document);
 var $$=document.querySelectorAll.bind(document);
 
-var worker = new Worker("worker.js");
-worker.onmessage=function(arg){
-	var type=arg.data[0],data=arg.data[1];
-	switch(type){
-		case 'progress':$('#progress').value=+data;break;
-		case 'result':$('#files').innerHTML+='<li><a href="'+data.href+'">'+data.name+'.'+data.type+'</a></li>';break;
-		default:;
+var magic=[
+	[[ 73, 68, 51        ],"mp3"],
+	[[ 71, 73, 70, 56, 57],"gif"],
+	[[137, 80, 78, 71    ],"png"],
+	[[ 79,103,103, 83    ],"ogg"],
+	[[255,216,255,224    ],"jpg"],
+	[[ 66, 77, 54,120    ],"bmp"],
+	[[ 68, 68, 83, 32    ],"dds"],
+	[[ 60, 63,120,109    ],"xml"],
+	//sony related
+	[[126 ,  80,  83,  80],'prx'],
+	[[0x00,0x50,0x52,0x46],'rco'],
+	[[  83,  67,  69,   0],'self'],
+	//Sony game ressources
+	[[0x52,0x49,0x46,0x46],"at3"],
+	[[0x50,0x54,0x46,0x46],"pt" ],
+	[[0x50,0x53,0x4d,0x46],"pmf"],
+	[[0x4d,0x49,0x47,0x2e],"gim"],
+];
+
+function memcmp(buffer,pos,token){
+	for(var i=0;i<token[0].length;i++)
+		if(token[0][i]!=buffer[pos+i])return;
+	return token[1];
+}
+function addResult(data){
+	if(data.zone[1]>=0)
+		$('#files').innerHTML+='<li><a>'+data.name+'</a><button onclick="this.previousElementSibling.href=window.URL.createObjectURL(new Blob([file.subarray('+data.zone[0]+','+data.zone[1]+')]))">.'+data.type+'</button></li>';
+}
+var file;
+function parse(e){
+	file=new Uint8Array(e.target.result)
+	var type,prev={pos:0,type:'head'};
+	for(var i=0;i<file.length;i++){
+//		if((i&0xFFFF)==0)$('#progress').value=+(i/file.length)
+		magic.forEach(function(m){
+			if(!(type=memcmp(file,i,m)))return;
+			addResult({
+				zone:[prev.pos,i-1],
+				name:i.toString(16),
+				type:prev.type,
+			});
+			prev.pos=i;
+			prev.type=type;
+		})
 	}
-};
+	addResult({
+		zone:[prev.pos,i-1],
+		name:i.toString(16),
+		type:prev.type,
+	});
+//	$('#progress').value=1
+}
 
 function loadFiles(){
 	var reader = new FileReader();
-	reader.onloadend = function(){worker.postMessage(this.result)};
+	reader.onloadend = parse;
 	reader.readAsArrayBuffer($('[type=file]').files[0]);
 }
 </script>
 </head>
 <body>
 	<form onsubmit="loadFiles()"><input type="file" onchange="loadFiles()"></form>
-	<progress id="progress" value="0" max="1">60%</progress>
+	<!--<progress id="progress" value="0" max="1">60%</progress>-->
 	<ul id="files">
 	</ul>
 </body>
