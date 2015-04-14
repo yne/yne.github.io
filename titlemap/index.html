@@ -1,0 +1,164 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8"/>
+<style>
+aside{background:rgba(0,0,0,.8);color:#FFF;position:absolute;padding:5px;border-radius:5px;box-shadow: 0 0 4px #000;top:0;left:0;}
+legend{font-size:large;font-family:sans-serif;display:block;}
+aside .close{position:absolute;top:0;right: 0;}
+input[type=file]{width:6em;}
+.titles_container{position:absolute;overflow: scroll;right:0;top:0;bottom:0;}
+.aside_open{position:absolute;left:0;top:0;}
+.main .conf{position:absolute;bottom:0;left:0;}
+form{background:rgba(0,0,0,.5);box-shadow:0 0 5px #000 inset;padding:5px;margin:4px;border-radius:3px;}
+</style>
+<script>
+$=function(sel,base){return (base||document).querySelector(sel)};
+var P={size:16,titles:[],map:[],width:0}
+
+function equal_base(a,b,width){
+	for(var i=0;i<a.length;i++)
+		if(a[i]!=b[i])return false;
+	return true;
+}
+function equal_flip(a,b,width){
+	for(var y=0;y<a.length;y+=width)
+		for(var x=0;x<width;x+=4)
+			for(var i=0;i<4;i++)
+				if(a[(y+(width-1-x))*4+i]!=b[(y+x)*4+i])return false;
+	return true;
+}
+function equal_mirror(a,b,width){
+	if(equal_base(a,b,width))return 1;
+	if(equal_flip(a,b,width))return -1;
+	return 0;
+}
+
+function getMapTitles(all_titles,size,equal){
+	var titles=new Array();//uniq sprites
+	var map=all_titles.map(function(title){
+		for(var t=0,uv=0;t<titles.length;t++)//search for an existing title
+			if(uv=equal(titles[t],title,size))//duplicate found ?
+				return t;//yes : use it index
+		return titles.push(title)-1;//none found, add to the list
+	});
+	return [map,titles];
+}
+function loadImage(size,file){
+	if(!size)size=16;
+	var reader=new FileReader();
+	reader.onload=function(){//file loaded
+		var img=new Image();
+		img.src=this.result;
+		img.onload=function(){//image decoded
+			var cnv=document.createElement("canvas");
+			cnv.width=this.width;
+			cnv.height=this.height;
+			var ctx=cnv.getContext('2d');
+			ctx.drawImage(this,0,0);
+			//split the map into multiple size*size blocks
+			//var all=Array.apply(null,Array((cnv.width/size)*(cnv.height/size))).map(function(c,i){var y=((i*size)/(cnv.height)|0)*size,x=(i*size)%cnv.width;return ctx.getImageData(y,x,size,size).data});
+			var all=new Array();
+			for(var y=0;y<cnv.width;y+=size)
+				for(var x=0;x<cnv.height;x+=size)
+					all.push(ctx.getImageData(y,x,size,size).data);
+			//extract uniq titles
+			var map_titles=getMapTitles(all,size,equal_base);
+			
+			show(size,map_titles[0],map_titles[1],cnv.width/size);
+		}
+	}
+	reader.readAsDataURL(file);
+}
+function loadFiles(size,map,ttl,sub){
+	var reader=new FileReader();
+	reader.onload=function(){//file loaded
+		P.map=[1,2,3,4,5];
+	}
+	reader.readAsArrayBuffer(file);
+	
+	P.size=size;
+	if(sub){
+		//P.titles=TODO
+	}else{
+		//P.titles=
+	}
+}
+function save(do_sub,map,ttl,sub){//retreive data from P
+	if(map.hasAttribute('href')){URL.revokeObjectURL(map.href);map.removeAttribute('href');}
+	if(ttl.hasAttribute('href')){URL.revokeObjectURL(ttl.href);ttl.removeAttribute('href');}
+	if(sub.hasAttribute('href')){URL.revokeObjectURL(sub.href);sub.removeAttribute('href');}
+	
+	if(do_sub){//TODO
+		//ttl.href=
+		//sub.href=
+	}else{
+		ttl.href=window.URL.createObjectURL(new Blob(P.titles))
+		ttl.title='nb:'+P.titles.length;
+	}
+	//map
+	var u=1<<Math.max(3,Math.ceil(Math.log2(Math.log2(P.titles.length))));
+	map.href=window.URL.createObjectURL(new Blob([new window['Uint'+u+'Array'](P.map)]))
+	map.title='nb:'+P.map.length+'(u'+u+')';
+}
+
+function show(size,map,titles,width){
+	$('aside').hidden=true;
+	P.size=size;P.titles=titles;P.map=map;P.width=width;//update Project
+	var fileReader = new FileReader();
+	fileReader.onload = function(){
+		$("#dom_size").value=size;
+		$("#dom_width").value=P.width;
+		$("#dom_map").innerHTML=map.length;
+		var cnv=$("#dom_titles");
+		cnv.width=size;
+		cnv.height=this.result.byteLength/4/size;
+		cnv.title='Num:'+cnv.height/size+'\nSize:~'+((cnv.height*cnv.width*4)>>10)+'Kb'
+		cnv.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(this.result),cnv.width,cnv.height),0,0);
+	};
+	fileReader.readAsArrayBuffer(new Blob(titles));
+}
+
+</script>
+</head>
+<body>
+<button class="aside_open" onclick="$('aside').hidden=false;">File</button>
+<aside _hidden><button class="close" onclick="$('aside').hidden=true;">&times;</button>
+
+<form onsubmit="try{loadImage(+this.elements.s.value,this.elements.f.files[0]);}catch(e){console.error(e)};return false;">
+	<legend><input type="submit" value="Load"/> from image dump</legend>
+	<select name="s" title="Titles size"><option>8<option selected>16<option>32</select>
+	<input name="f" type="file" accept="image/*" title="Image file" required/>
+</form>
+
+<form onsubmit="var e=this.elements;try{loadFiles(+e.s.value,e.map.files[0],e.ttl.files[0],e.sub.files[0]);}catch(e){console.error(e)};return false;">
+	<legend><input type="submit" value="Load"/> from files [.map .ttl .sub]</legend>
+	<select name="s" title="Titles size"><option>8<option selected>16<option>32</select>
+	<input name="ttl" accept=".ttl" type="file" title="Title file" required/>
+	<select name="map_u" title="MapDataType"><option value="8">u8<option value="16">u16</select>
+	<input name="map" accept=".map" type="file" title="Map file" required/>
+	<input name="sub" accept=".sub" type="file" title="Sub file (optional)"/>
+</form>
+
+<form onsubmit="try{save(this.elements.do_sub.checked,$('[name=map]',this),$('[name=ttl]',this),$('[name=sub]',this));}catch(a){alert(a)}return false;">
+	<legend><input type="submit" value="Save"/> to files [.map .ttl .sub]</legend>
+	<a name="map">map.map</a>
+	<a name="ttl">titles.ttl</a>
+	<input name="do_sub" type="checkbox"/><a name="sub">subtitle.sub</a>
+	
+</form>
+</aside>
+
+<div class="main">
+	<div class="conf">
+		<input id="dom_size" title="Titles size (px)" size="4" readonly />
+		<input id="dom_width" title="Map width (Title)" size="4" readonly />
+	</div>
+	<table id="dom_map"></table>
+	<div class="titles_container">
+		<canvas id="dom_titles" width="1" height="1"></canvas>
+	</div>
+</div>
+
+</body>
+</html>
