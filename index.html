@@ -1,40 +1,52 @@
-﻿<!DOCTYPE HTML>
+<!DOCTYPE HTML>
 <html>
 <head>
 	<meta charset="utf8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-	<link rel="stylesheet" href="style.css"></style>
-</head>
-<body onload="if(location.hash)location.href='/resume/#chocolat.yne.fr/'+location.hash.substr('1')+'.md'">
-	<ul id="repos"></ul>
-	<script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+	<style>
+	.cell {
+		width: 150px;
+		display: inline-block;
+		vertical-align: top;
+		height: 100px;
+		position: relative;
+		text-decoration: none;
+		overflow: hidden;
+		box-shadow: 0 1px 2px #888;
+		margin: 5px;
+		padding: 5px;
+		color: #000;
+	}
+	.cell .name {display: block;text-align: center;}
+	.cell .desc {display: block;text-align: center;}
+	.cell .date {position:absolute;bottom:0;left :0;width:100%;background-color: #FFF;}
+	.cell .lang {position:absolute;bottom:0;right:0;}
+	</style>
+	<script src="$.js"></script>
 	<script>
-		var contents,repos;
-		function showAll(){
-			$('#repos').html([].concat(repos,contents)
+		function showAll(repos,contents){
+			var list=repos.concat(contents)
 				.filter(function(a){return !(a.type&&a.type!='dir')})
 				.sort(function(a,b){return b.name.toLowerCase()<a.name.toLowerCase();})
-				.map(function(bloc){
-				var isweb=(bloc.default_branch=='gh-pages')||bloc.type;
-				console.log(bloc.name,isweb)
-				return '<li class="bloc '+(isweb?'app':'repo')+'">'+
-					'<div class="name"><a href="'+(isweb?bloc.name:bloc.html_url)+'">'+(bloc.full_name||'/'+bloc.name).split('/').slice(1)+'</a></div>'+
-					'<div class="desc"><div class="desc_">'+(bloc.description||'')+'</div></div>'+
-					'<div class="date">'+(bloc.updated_at?(new Date(bloc.updated_at)).toLocaleDateString():'')+'</div>'+
-					'<div class="lang">'+(bloc.language||'web')+'</div>'+
-				'</li>';}));
+			$.empty(document.body).appendChild($.toNode(['div'].concat(list.map(function(el){
+				var isweb=(el.default_branch=='gh-pages')||el.type;
+				return ['a',{"class":'cell '+(isweb?'app':'repo'),href:isweb?el.name:el.html_url,draggable:true},
+				['span',{'class':'name'},(el.full_name||'/'+el.name).split('/').slice(1).join('')],
+				['span',{'class':'desc'},(el.description||'')],
+				['span',{'class':'date'},(el.updated_at?(new Date(el.updated_at)).toLocaleDateString():'')],
+				['span',{'class':'lang'},(el.language||'web')],
+			]}))))
 		};
-		$('#repos').html('<div class="wait">Loading...</div>');
-		//retreive webapps/repo
-		var remain_requests=2;
-		$.get('https://api.github.com/repos/yne/yne.github.io/contents/',function(c){
-			contents=c;
-			if(!--remain_requests)showAll();
-		});
-		$.get('https://api.github.com/users/yne/repos',function(r){
-			repos=r;
-			if(!--remain_requests)showAll();
-		})
+		function fetch(host){//retreive webapps/repo
+			$.get(host+'users/yne/repos',function(repos){
+				$.get(host+'repos/yne/yne.github.io/contents/',function(yne){
+					showAll(JSON.parse(repos.target.response),JSON.parse(yne.target.response));
+				})
+			});
+		}
 	</script>
+</head>
+<body onload="fetch('https://api.github.com/')">
+	<div class="wait">...</div>
 </body>
 </html>
