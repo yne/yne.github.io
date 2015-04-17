@@ -1,26 +1,20 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-	<meta charset="utf8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
 	<style>
-	.cell {
-		width: 150px;
-		display: inline-block;
-		vertical-align: top;
-		height: 100px;
-		position: relative;
-		text-decoration: none;
-		overflow: hidden;
-		box-shadow: 0 1px 2px #888;
-		margin: 5px;
-		padding: 5px;
-		color: #000;
-	}
-	.cell .name {display: block;text-align: center;}
-	.cell .desc {display: block;text-align: center;}
-	.cell .date {position:absolute;bottom:0;left :0;width:100%;background-color: #FFF;}
-	.cell .lang {position:absolute;bottom:0;right:0;}
+	body{background:#CCC;font-size:1.4em;font-family:sans-serif;}
+	*{transition: .2s all linear;}
+	a{text-decoration: none;color: #444;}
+	.cell{width:8em;height:6em;display: inline-block;position: relative;}
+	.cell{box-shadow:0 .1em .2em;margin:.5em;background:#FFF;}
+	.cell:hover{color:#000;box-shadow:0 .2em .4em;}
+	.cell span{padding:.2em;position:absolute;text-align: center;display: block;}
+	.cell .name{left:0;right:0;top:0;background:#EEE;}
+	.cell .desc{font-size:.8em;left:0;right:0;top:2em;bottom:1.5em;overflow:hidden;}
+	.cell .date{font-size:.7em;bottom:0;left :0;}
+	.cell .lang{font-size:.7em;bottom:0;right:0;}
 	</style>
 	<script src="$.js"></script>
 	<script>
@@ -29,9 +23,11 @@
 				.filter(function(a){return !(a.type&&a.type!='dir')})
 				.sort(function(a,b){return b.name.toLowerCase()<a.name.toLowerCase();})
 			$.empty(document.body).appendChild($.toNode(['div'].concat(list.map(function(el){
+				var rand=(el.full_name||el.name).split('').reduce(function(prev,cur,i,a){return prev+cur.charCodeAt(0)},0);
+				var color='#'+(0xCCC+Number.parseInt((rand%26).toString(3),16)).toString(16);
 				var isweb=(el.default_branch=='gh-pages')||el.type;
 				return ['a',{"class":'cell '+(isweb?'app':'repo'),href:isweb?el.name:el.html_url,draggable:true},
-				['span',{'class':'name'},(el.full_name||'/'+el.name).split('/').slice(1).join('')],
+				['span',{'class':'name',style:'background:'+color},(el.full_name||'/'+el.name).split('/').slice(1).join('')],
 				['span',{'class':'desc'},(el.description||'')],
 				['span',{'class':'date'},(el.updated_at?(new Date(el.updated_at)).toLocaleDateString():'')],
 				['span',{'class':'lang'},(el.language||'web')],
