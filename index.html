@@ -2,6 +2,7 @@
 <html>
 <head>
 	<meta charset="utf-8"/>
+	<title>YNE repositories</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
 	<style>
 	body{background:#EEE;font-size:1.4em;font-family:sans-serif;}
@@ -34,28 +35,32 @@
 			$.empty(document.body).appendChild($.toNode(['div'].concat(list.map(function(el){
 				var title=(el.full_name||'/'+el.name).split('/').slice(1).join('');
 				var rand=title.split('').reduce(function(prev,cur,i,a){return prev+cur.charCodeAt(0)},0);
-				var color='#'+(0xCCC+Number.parseInt((rand%26).toString(3),16)).toString(16);
+				console.log(rand)
+				var color='#'+(0xDDD+Number.parseInt((rand%26).toString(3),16)).toString(16);
 				var isweb=(el.default_branch=='gh-pages')||el.type;
 				var memo=localStorage['memo_'+title]
-				return ['a',{"class":'cell '+(isweb?'app':'repo'),href:isweb?el.name:el.html_url,draggable:true},
-				['span',{'class':'name',style:'background:'+color},title],
-				['span',{'class':'desc'},(el.description||'')],
-				['span',{'class':'date'},(el.updated_at?(new Date(el.updated_at)).toLocaleDateString():'')],
-				['span',{'class':'lang'},(el.language||'web')],
-				['button',{'class':'memo '+(memo?'':'empty'),title:memo||'Add a TODO reminder',onclick:function(){
-					var p=prompt('',localStorage['memo_'+title]||'');
-					console.log(p,this.classList)
-					if(p!=null){localStorage['memo_'+title]=p;this.classList.remove('empty');}
-					if(!p)this.classList.add('empty');
-					return false}},'\u2713'],
-			]}))))
+				return ['a',{/*style:'transform: rotate('+((rand%20)-10)/5+'deg)',*/
+						ondragstart:function(e){e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('id',this.id)},
+						ondragover :function(e){if(e.preventDefault)e.preventDefault();e.dataTransfer.dropEffect='move';},
+						ondrop     :function(e){if(e.preventDefault)e.preventDefault();this.parentElement.insertBefore(document.getElementById(e.dataTransfer.getData('id')),this)},
+					},{"class":'cell '+(isweb?'app':'repo'),id:title,href:isweb?el.name:el.html_url,draggable:true},
+					['span',{'class':'name',style:'background:'+color},title],
+					['span',{'class':'desc'},(el.description||'')],
+					['span',{'class':'date'},(el.updated_at?(new Date(el.updated_at)).toLocaleDateString():'')],
+					['span',{'class':'lang'},(el.language||'web')],
+					['button',{'class':'memo '+(memo?'':'empty'),title:memo||'Add a TODO reminder',onclick:function(){
+						var p=prompt('',localStorage['memo_'+title]||'');
+						if(p!=null){localStorage['memo_'+title]=p;this.classList.remove('empty');}
+						if(p=="")this.classList.add('empty');
+						return false}},'\u2713'],
+				]}))))
 		};
 		function fetch(host){//retreive webapps/repo
 			$.get(host+'users/yne/repos',function(repos){
 				$.get(host+'repos/yne/yne.github.io/contents/',function(yne){
-					showAll(JSON.parse(repos.target.response),JSON.parse(yne.target.response));
+					showAll(JSON.parse(repos.target.response),JSON.parse(yne.target.response))
 				})
-			});
+			})
 		}
 	</script>
 </head>

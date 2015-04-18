@@ -13,6 +13,7 @@ $.toNode=function(jsonML){
 		if(j)switch(j.constructor){
 			case Array :node.appendChild($.toNode(j));break;
 			case Object:for(attr in j){
+				//if(attr.match(/^on/))node.addEventListener(attr.substr(2),j[attr],false);
 				if(attr.match(/^on/))node[attr]=j[attr];//event attribut
 				else node.setAttribute(attr,j[attr])//other attribut
 			};break;
