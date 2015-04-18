@@ -29,22 +29,24 @@
 	<script src="$.js"></script>
 	<script>
 		function showAll(repos,contents){
-			var list=repos.concat(contents)
-				.filter(function(a){return !(a.type&&a.type!='dir')})
-				.sort(function(a,b){return b.name.toLowerCase()<a.name.toLowerCase();})
+			var o=(localStorage['cell_order']||'').split(',');
+			var list=repos.concat(contents).filter(function(a){return !(a.type&&a.type!='dir')})
+				.sort(function(a,b){return o.length?o.indexOf(b.name)<o.indexOf(a.name):b.name.toLowerCase()<a.name.toLowerCase()});
 			$.empty(document.body).appendChild($.toNode(['div'].concat(list.map(function(el){
 				var title=(el.full_name||'/'+el.name).split('/').slice(1).join('');
 				var rand=title.split('').reduce(function(prev,cur,i,a){return prev+cur.charCodeAt(0)},0);
-				console.log(rand)
 				var color='#'+(0xDDD+Number.parseInt((rand%26).toString(3),16)).toString(16);
 				var isweb=(el.default_branch=='gh-pages')||el.type;
 				var memo=localStorage['memo_'+title]
 				return ['a',{/*style:'transform: rotate('+((rand%20)-10)/5+'deg)',*/
 						ondragstart:function(e){e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('id',this.id)},
 						ondragover :function(e){if(e.preventDefault)e.preventDefault();e.dataTransfer.dropEffect='move';},
-						ondrop     :function(e){if(e.preventDefault)e.preventDefault();this.parentElement.insertBefore(document.getElementById(e.dataTransfer.getData('id')),this)},
+						ondrop     :function(e){if(e.preventDefault)e.preventDefault();
+							this.parentElement.insertBefore(document.getElementById(e.dataTransfer.getData('id')),this)
+							localStorage['cell_order']=$$('.cell').map(function(a){return a.id}).join(',')
+						},
 					},{"class":'cell '+(isweb?'app':'repo'),id:title,href:isweb?el.name:el.html_url,draggable:true},
-					['span',{'class':'name',style:'background:'+color},title],
+					['span',{'class':'name',style:'background:'+color+';cursor:move'},title],
 					['span',{'class':'desc'},(el.description||'')],
 					['span',{'class':'date'},(el.updated_at?(new Date(el.updated_at)).toLocaleDateString():'')],
 					['span',{'class':'lang'},(el.language||'web')],
