@@ -7,10 +7,6 @@ TitleMap=function(){
 	this.view_ctx=this.view.getContext('2d');
 	this.titles=document.getElementById('titles');
 }
-TitleMap.prototype.toGUI=function(){
-	$('aside').hidden=true;
-//	fileReader.readAsArrayBuffer(new Blob(this.titles));
-};
 TitleMap.prototype.view2TitlesMap=function(tmp_titles,mirror){
 	function equal_base(a,b,width){
 		for(var i=0;i<a.data.length;i++)
@@ -42,60 +38,39 @@ TitleMap.prototype.view2TitlesMap=function(tmp_titles,mirror){
 		return this.titles.push(title)-1;//none found, add to the list
 	},this);
 	return this;
-};
+}
 TitleMap.prototype.set=function(pos,val){
 	var x=(pos*this.size)%this.view.width;
 	var y=(((pos*this.size)-x)/this.view.width)*this.size
 	this.view_ctx.putImageData(this.titles[val],x,y);
 	this.map[pos]=val;
 }
-TitleMap.prototype.showTitles=function(list){
-	var self=this;
-	var t=$('#titles');
-	[].slice.call(t.childNodes).forEach(function(c){t.removeChild(c)})
-	self.titles
-//	.sort(function(a,b){return self.titles_occur[a]<self.titles_occur[b]})
-	.forEach(function(img,i){
-		var c=El('canvas',{width:self.size,height:self.size})
-		c.title=i+'*'+self.titles_occur[i];
-		c.id="title_"+i;
-		c.ondragstart=function(e){e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('id',this.id)},
-		c.ondragover =function(e){if(e.preventDefault)e.preventDefault();e.dataTransfer.dropEffect='move';},
-		c.ondrop     =function(e){if(e.preventDefault)e.preventDefault();
-			var from=+e.dataTransfer.getData('id').substr(6),to=+this.id.substr(6);
-			if(from==to)return;
-			self.map.forEach(function(m,i){if(m==to)this.set(i,from)},self);
-			c.parentElement.insertBefore(document.getElementById(e.dataTransfer.getData('id')),c);
-			c.parentElement.removeChild(c);
-		}
-		c.draggable=true;
-		c.getContext('2d').putImageData(img,0,0);
-		$('#titles').appendChild(c)
-	},this)
-}
-TitleMap.prototype.fromImage=function(size,img_f){
+TitleMap.prototype.fromImageFile=function(size,img_f,cb){
 	var self=this;
 	var reader=new FileReader();
 	reader.onload=function(){//file loaded
 		var img=new Image();
-		img.src=this.result;
 		img.onload=function(){//image decoded
-			self.size=size;
-			self.view.width=this.width;
-			self.view.height=this.height;
-			self.view_ctx.drawImage(this,0,0);
-			
-			for(var y=0,tmp=[];y<self.view.height;y+=size)
-				for(var x=0;x<self.view.width;x+=size)
-					tmp.push(self.view_ctx.getImageData(x,y,size,size));
-					
-			self.view2TitlesMap(tmp,false);//remove duplicate titles
-			self.showTitles()
-			self.toGUI();
+			self.fromImageData(size,this,cb)
 		}
+		img.src=this.result;
 	}
 	reader.readAsDataURL(img_f);
-};
+}
+TitleMap.prototype.fromImageData=function(size,img_d,cb){
+	this.size=size;
+	this.width=img_d.width/size;
+	this.view.width=img_d.width;
+	this.view.height=img_d.height;
+	this.view_ctx.drawImage(img_d,0,0);
+	
+	for(var y=0,tmp=[];y<this.view.height;y+=size)
+		for(var x=0;x<this.view.width;x+=size)
+			tmp.push(this.view_ctx.getImageData(x,y,size,size));
+			
+	this.view2TitlesMap(tmp,true);//remove duplicate titles
+	if(cb)cb.call(this);
+}
 TitleMap.prototype.fromFiles=function(size,map_f,ttl_f,sub_f){
 	var self=this;
 	var reader=new FileReader();
