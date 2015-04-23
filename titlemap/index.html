@@ -30,22 +30,23 @@
 	<select name="size" title="Titles size"><option>8</option><option selected>16</option><option>32</option></select>
 	<input name="file" type="file" accept="image/*" title="Image file" required/>
 </form>
+
 <form onsubmit="var e=this.elements;try{
-	P.fromFiles(+e.s.value,e.map.files[0],e.ttl.files[0],e.sub.files[0]);
+	P.fromFiles(+e.size.value,+e.width.value,e.map.files[0],+e.map_u.value,e.ttl.files[0],P.showTitles);
 	}catch(e){console.error(e)};return false;">
 	<legend><input type="submit" value="Load"/> from files [.map .ttl .sub]</legend>
-	<select name="s" title="Titles size"><option>8</option><option selected>16</option><option>32</option></select>
+	<select name="size" title="Titles size"><option>8</option><option selected>16</option><option>32</option></select>
 	<input name="ttl" accept=".ttl" type="file" title="Title file" required/>
+	<input name="width" value="256" placeholder="Width" required/>
 	<select name="map_u" title="MapDataType"><option value="8">u8</option><option value="16">u16</option></select>
 	<input name="map" accept=".map" type="file" title="Map file" required/>
-	<input name="sub" accept=".sub" type="file" title="Sub file (optional)"/>
 </form>
+
 <form onsubmit="var e=this.elements;try{
 	P.toHref(e.do_sub.checked,$('[name=map]',this),$('[name=ttl]',this),$('[name=sub]',this));
 	}catch(e){console.error(e)}return false;">
 	<legend><input type="submit" value="Save"/> to files</legend>
 	<a name="ttl">titles</a>
-	<a name="att">attr</a>
 	<a name="map">info</a>
 	<input name="do_sub" type="checkbox"/><a name="sub">sub</a>
 </form>
@@ -56,8 +57,10 @@
 
 <div class="hud">
 	<div class="conf">
+		<!--
 		<input id="size" title="Titles size (px)" size="4" readonly />
 		<input id="width" title="Map width (Title)" size="4" readonly />
+		-->
 	</div>
 	<div class="titles_container"><span id="titles"/></div>
 </div>

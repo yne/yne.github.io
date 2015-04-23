@@ -5,7 +5,6 @@ TitleMap=function(){
 	this.width;/*sprite par row*/
 	this.view=document.getElementById('view');
 	this.view_ctx=this.view.getContext('2d');
-	this.titles=document.getElementById('titles');
 }
 TitleMap.prototype.view2TitlesMap=function(tmp_titles,mirror){
 	function equal_base(a,b,width){
@@ -71,40 +70,54 @@ TitleMap.prototype.fromImageData=function(size,img_d,cb){
 	this.view2TitlesMap(tmp,true);//remove duplicate titles
 	if(cb)cb.call(this);
 }
-TitleMap.prototype.fromFiles=function(size,map_f,ttl_f,sub_f){
+TitleMap.prototype.fromFiles=function(size,width,map_f,map_type,ttl_f,cb){
 	var self=this;
 	var reader=new FileReader();
-	reader.onload=function(){//file loaded
-		self.map=[1,2,3,4,5];
+	reader.onload=function(){//map loaded
+		self.map=Array.prototype.slice.call(new window['Uint'+map_type+'Array'](this.result));
+		reader.onload=function(){//sprites loaded
+			var titles=new Uint8ClampedArray(this.result);
+			for(var i=0;i<titles.length;i+=size*size*4)
+				self.titles.push(new ImageData(titles.subarray(i,i+(size*size*4)),size,size))
+			self.size=size;
+			self.width=width;
+			self.view.width=size*width;
+			self.view.height=size*(self.map.length/width);
+			self.titles_occur=[];
+			for(var y=0,i=0;y<self.map.length/width;y++)
+				for(var x=0;x<width;x++){
+					if(!self.titles_occur[i])self.titles_occur[i]=0;
+					self.titles_occur[i]++;
+					self.view_ctx.putImageData(self.titles[self.map[i++]],x*size,y*size);
+				}
+			if(cb)cb.call(self)
+		}
+		reader.readAsArrayBuffer(ttl_f);
 	}
-	reader.readAsArrayBuffer(file);
-	
-	self.size=size;
-	if(sub_f){
-		//self.titles=TODO
-	}else{
-		//self.titles=
-	}
+	reader.readAsArrayBuffer(map_f);
 }
 TitleMap.prototype.mapTitles2Image=function(map,title,width,size,can_inv){//to create title from sub
 	
 }
-TitleMap.prototype.toHref=function(do_sub,map_a,inf_a,ttl_a,sub_a){
+TitleMap.prototype.toHref=function(do_sub,map_a,ttl_a,sub_a){
 	for(var i=0;i<arguments.length;i++)//free all .href
 		if(arguments[i].constructor==HTMLAnchorElement && arguments[i].hasAttribute('href'))
 			URL.revokeObjectURL(arguments[i].href),
 			arguments[i].removeAttribute('href');
-	
-	if(do_sub){//TODO
-		//ttl_a.href=
-		//sub_a.href=
-	}else{
-		ttl_a.href=window.URL.createObjectURL(new Blob(this.titles))
-		ttl_a.title='nb:'+this.titles.length;
-	}
+	//titles
+	var cnv=document.createElement('canvas')
+	cnv.width=this.size
+	cnv.height=this.size*this.titles.length
+	var ctx=cnv.getContext('2d');
+	this.titles.forEach(function(title,i){
+		ctx.putImageData(title,0,i*this.size)
+	},this)
+	var blob=new Blob([ctx.getImageData(0,0,cnv.width,cnv.height).data])
+	ttl_a.href=window.URL.createObjectURL(blob)
+	ttl_a.title='nb:'+this.titles.length+'='+blob.size/1024+'KB';
 	//map
 	var u=1<<Math.max(3,Math.ceil(Math.log2(Math.log2(this.titles.length))));
-	map_a.href=window.URL.createObjectURL(new Blob([new window['Uint'+u+'Array'](this.map_a)]))
-	map_a.title='nb:'+this.map_a.length+'(u'+u+')';
+	map_a.href=window.URL.createObjectURL(new Blob([new window['Uint'+u+'Array'](this.map)]))
+	map_a.title='nb:'+this.map.length+'(u'+u+') = '+(this.map.length*u/8)/1024+'Kb';
 	//info
 }
