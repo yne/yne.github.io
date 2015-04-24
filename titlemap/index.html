@@ -32,23 +32,21 @@
 </form>
 
 <form onsubmit="var e=this.elements;try{
-	P.fromFiles(+e.size.value,+e.width.value,e.map.files[0],+e.map_u.value,e.ttl.files[0],P.showTitles);
+	var f={};[].slice.call(e.files.files).forEach(function(file){
+		f[(file.name.match(/\w+$/)||['_'])[0]]=file;
+	});P.fromFiles(f.json,f.map,f.ttl,P.showTitles);
 	}catch(e){console.error(e)};return false;">
-	<legend><input type="submit" value="Load"/> from files [.map .ttl .sub]</legend>
-	<select name="size" title="Titles size"><option>8</option><option selected>16</option><option>32</option></select>
-	<input name="ttl" accept=".ttl" type="file" title="Title file" required/>
-	<input name="width" value="256" placeholder="Width" required/>
-	<select name="map_u" title="MapDataType"><option value="8">u8</option><option value="16">u16</option></select>
-	<input name="map" accept=".map" type="file" title="Map file" required/>
+	<legend><input type="submit" value="Load"/> from files [.map+.ttl+.json]</legend>
+	<input name="files" accept="*.map;*.ttl;*.json" type="file" multiple required/>
 </form>
 
 <form onsubmit="var e=this.elements;try{
-	P.toHref(e.do_sub.checked,$('[name=map]',this),$('[name=ttl]',this),$('[name=sub]',this));
+	P.toHref($('[name=title]',this),$('[name=map]',this),$('[name=info]',this));
 	}catch(e){console.error(e)}return false;">
 	<legend><input type="submit" value="Save"/> to files</legend>
-	<a name="ttl">titles</a>
-	<a name="map">info</a>
-	<input name="do_sub" type="checkbox"/><a name="sub">sub</a>
+	<a name="title" download="a.ttl">titles</a>
+	<a name="map" download="a.map">map</a>
+	<a name="info" download="a.json">info</a>
 </form>
 </aside>
 <div class="map_container">
@@ -56,12 +54,6 @@
 </div>
 
 <div class="hud">
-	<div class="conf">
-		<!--
-		<input id="size" title="Titles size (px)" size="4" readonly />
-		<input id="width" title="Map width (Title)" size="4" readonly />
-		-->
-	</div>
 	<div class="titles_container"><span id="titles"/></div>
 </div>
 

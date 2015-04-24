@@ -3,6 +3,7 @@ TitleMap=function(){
 	this.map=[/*0,1,1,2...*/];
 	this.size/*16*/;
 	this.width;/*sprite par row*/
+	this.limit;// last non-crossable sprites index
 	this.view=document.getElementById('view');
 	this.view_ctx=this.view.getContext('2d');
 }
@@ -70,36 +71,38 @@ TitleMap.prototype.fromImageData=function(size,img_d,cb){
 	this.view2TitlesMap(tmp,true);//remove duplicate titles
 	if(cb)cb.call(this);
 }
-TitleMap.prototype.fromFiles=function(size,width,map_f,map_type,ttl_f,cb){
+TitleMap.prototype.fromFiles=function(info_f,map_f,ttl_f,cb){
 	var self=this;
 	var reader=new FileReader();
-	reader.onload=function(){//map loaded
-		self.map=Array.prototype.slice.call(new window['Uint'+map_type+'Array'](this.result));
-		reader.onload=function(){//sprites loaded
-			var titles=new Uint8ClampedArray(this.result);
-			for(var i=0;i<titles.length;i+=size*size*4)
-				self.titles.push(new ImageData(titles.subarray(i,i+(size*size*4)),size,size))
-			self.size=size;
-			self.width=width;
-			self.view.width=size*width;
-			self.view.height=size*(self.map.length/width);
-			self.titles_occur=[];
-			for(var y=0,i=0;y<self.map.length/width;y++)
-				for(var x=0;x<width;x++){
-					if(!self.titles_occur[i])self.titles_occur[i]=0;
-					self.titles_occur[i]++;
-					self.view_ctx.putImageData(self.titles[self.map[i++]],x*size,y*size);
-				}
-			if(cb)cb.call(self)
+	reader.onload=function(){//json loaded
+		var info=JSON.parse(this.result);
+		self.size=+info.size;
+		self.width=+info.width;
+		self.limit=+info.limit||0;
+		reader.onload=function(){//map loaded
+			self.map=Array.prototype.slice.call(new window['Uint'+info.mapType+'Array'](this.result));
+			reader.onload=function(){//sprites loaded
+				var titles=new Uint8ClampedArray(this.result),ttlsize=self.size*self.size*4;
+				for(var i=0;i<titles.length;i+=ttlsize)
+					self.titles.push(new ImageData(titles.subarray(i,i+ttlsize),self.size,self.size))
+				self.view.width=self.size*self.width;
+				self.view.height=self.size*(self.map.length/self.width);
+				self.titles_occur=[];
+				for(var y=0,i=0;y<self.map.length/self.width;y++)
+					for(var x=0;x<self.width;x++){
+						if(!self.titles_occur[i])self.titles_occur[i]=0;
+						self.titles_occur[i]++;
+						self.view_ctx.putImageData(self.titles[self.map[i++]],x*self.size,y*self.size);
+					}
+				if(cb)cb.call(self)
+			}
+			reader.readAsArrayBuffer(ttl_f);
 		}
-		reader.readAsArrayBuffer(ttl_f);
+		reader.readAsArrayBuffer(map_f);
 	}
-	reader.readAsArrayBuffer(map_f);
+	reader.readAsText(info_f);
 }
-TitleMap.prototype.mapTitles2Image=function(map,title,width,size,can_inv){//to create title from sub
-	
-}
-TitleMap.prototype.toHref=function(do_sub,map_a,ttl_a,sub_a){
+TitleMap.prototype.toHref=function(ttl_a,map_a,info_a){
 	for(var i=0;i<arguments.length;i++)//free all .href
 		if(arguments[i].constructor==HTMLAnchorElement && arguments[i].hasAttribute('href'))
 			URL.revokeObjectURL(arguments[i].href),
@@ -109,15 +112,16 @@ TitleMap.prototype.toHref=function(do_sub,map_a,ttl_a,sub_a){
 	cnv.width=this.size
 	cnv.height=this.size*this.titles.length
 	var ctx=cnv.getContext('2d');
-	this.titles.forEach(function(title,i){
-		ctx.putImageData(title,0,i*this.size)
-	},this)
+	this.titles.forEach(function(title,i){ctx.putImageData(title,0,i*this.size)},this)
 	var blob=new Blob([ctx.getImageData(0,0,cnv.width,cnv.height).data])
 	ttl_a.href=window.URL.createObjectURL(blob)
 	ttl_a.title='nb:'+this.titles.length+'='+blob.size/1024+'KB';
 	//map
-	var u=1<<Math.max(3,Math.ceil(Math.log2(Math.log2(this.titles.length))));
-	map_a.href=window.URL.createObjectURL(new Blob([new window['Uint'+u+'Array'](this.map)]))
-	map_a.title='nb:'+this.map.length+'(u'+u+') = '+(this.map.length*u/8)/1024+'Kb';
+	var mapType=1<<Math.max(3,Math.ceil(Math.log2(Math.log2(this.titles.length))));
+	map_a.href=window.URL.createObjectURL(new Blob([new window['Uint'+mapType+'Array'](this.map)]))
+	map_a.title='nb:'+this.map.length+'(u'+mapType+') = '+(this.map.length*mapType/8)/1024+'Kb';
 	//info
+	info_a.href=window.URL.createObjectURL(new Blob([JSON.stringify({
+		mapType:mapType,size:this.size,width:this.width,limit:this.limit
+	})]))
 }
