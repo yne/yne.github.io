@@ -62,6 +62,26 @@ _
 	<textarea id="layout" cols="80" rows="6" onkeyup="kb.innerHTML=printHTML(parseText(this.value))"></textarea>
 </div>
 <h1>Preview :</h1>
+<script>function set_modifier(){this.elements}</script>
+<form onchange="console.log('change')">
+	<input type="checkbox" name="check_shift"     /><label>shift</label>
+	<input type="checkbox" name="check_lshift"    /><label>lshift</label>
+	<input type="checkbox" name="check_rshift"    /><label>rshift</label>
+	<input type="checkbox" name="check_alt"       /><label>alt</label>
+	<input type="checkbox" name="check_lalt"      /><label>lalt</label>
+	<input type="checkbox" name="check_ralt"      /><label>ralt</label>
+	<input type="checkbox" name="check_ctrl"      /><label>ctrl</label>
+	<input type="checkbox" name="check_lctrl"     /><label>lctrl</label>
+	<input type="checkbox" name="check_rctrl"     /><label>rctrl</label>
+	<input type="checkbox" name="check_meta"      /><label>meta</label>
+	<input type="checkbox" name="check_lmeta"     /><label>lmeta</label>
+	<input type="checkbox" name="check_rmeta"     /><label>rmeta</label>
+	<input type="checkbox" name="check_sym"       /><label>sym</label>
+	<input type="checkbox" name="check_fn"        /><label>fn</label>
+	<input type="checkbox" name="check_capslock"  /><label>capslock</label>
+	<input type="checkbox" name="check_numlock"   /><label>numlock</label>
+	<input type="checkbox" name="check_scrolllock"/><label>scrolllock</label>
+</form>
 <div id="kb"></div>
 
 <button onclick="alert(getfile_kl(parseText(layout.value)))">get .kl file</button>
@@ -79,8 +99,8 @@ _
 <div id="key_value">
 	<select>
 		<option title="label physically printed on the key">label</option>
-		<option title="Applies when a numeric text view has focus">base</option>
-		<option title="Applies when no modifiers are pressed">number</option>
+		<option title="Applies when no modifiers are pressed">base</option>
+		<option title="Applies when a numeric text view has focus">number</option>
 		<option>shift</option>
 		<option>lshift</option>
 		<option>rshift</option>

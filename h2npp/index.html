@@ -1,0 +1,20 @@
+<script>
+function test(){
+	var text=document.getElementById("in").value;
+	var ret="";
+	for(var t=text.split("\n"),i=0;i<t.length;i++){
+		var r=t[i].match(/(\w+) (\w+) \((.*?)\)/);
+		if(!r){alert("unk");continue;}
+		var arg="";
+		if(r[3].length)arg='<Param name="'+r[3].replace(",",'" /><Param name="')+'" />';
+		ret+=('<KeyWord name="'+r[2]+'" func="yes"><Overload retVal="'+r[1]+'" >'+arg+'</Overload></KeyWord>\n')
+	}
+	document.getElementById("out").innerHTML=ret;
+}</script>
+<dl>
+<dt>*.h</dt>
+<dd><textarea id="in"></textarea></dd>
+<dt>npp.xml</dt>
+<dd><textarea id="out"></textarea></dd>
+<dt><button onclick="test()">ok</button></dt>
+</dl>
