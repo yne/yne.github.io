@@ -55,11 +55,11 @@
 	function showAll(repos,contents){
 		var o=(localStorage['cell_order']||'').split(',');
 		var list=repos.concat(contents).filter(function(a){return !(a.type&&a.type!='dir')})
-			.sort(function(a,b){console.log(a.name,b.name,b.name.toLowerCase()<a.name.toLowerCase());return /*o.length?o.indexOf(b.name)<o.indexOf(a.name):*/b.name.toLowerCase()<a.name.toLowerCase()});
+			.sort(function(a,b){return b.name.toLowerCase()<a.name.toLowerCase()});
 		$.empty(document.body).appendChild($.toNode(['div'].concat(list.map(function(el){
 			var title=(el.full_name||'/'+el.name).split('/').slice(1).join('');
 			var rand=title.split('').reduce(function(prev,cur,i,a){return prev+cur.charCodeAt(0)},0);
-			var color='#'+(0xDDD+Number.parseInt((rand%26).toString(3),16)).toString(16);
+			var color='#'+(0xDDD+parseInt((rand%26).toString(3),16)).toString(16);
 			var isweb=(el.default_branch=='gh-pages')||el.type;
 			var memo=localStorage['memo_'+title]
 			return ['a',{/*style:'transform: rotate('+((rand%20)-10)/5+'deg)',*/
@@ -91,6 +91,12 @@
 	</script>
 </head>
 <body onload="fetch('https://api.github.com/')">
+	<noscript>
+	<ul>
+		<li><a href="https://github.com/yne?tab=repositories">My Repositories</a></li>
+		<li><a href="https://gist.github.com/yne">My Snippets</a></li>
+	</ul>
+	</noscript>
 	<div class="wait">...</div>
 </body>
 </html>
