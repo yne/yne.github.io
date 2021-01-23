@@ -10,6 +10,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2 # TODO: inline
       - run: make
+        env:
+          PHOTOS_URL: ${{ secrets.PHOTOS_URL }}
+          TRACKS_URL: ${{ secrets.TRACKS_URL }}
       - name: push
         run: |
          git config user.name  "${GITHUB_ACTOR}"
