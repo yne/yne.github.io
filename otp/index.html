@@ -2,22 +2,27 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width" />
 <title>TOTP</title>
-<form>
-  <input type=password name="secret" placeholder="onelogin seed" />
-  <button type=button onclick="navigator.clipboard.writeText(this.innerText);this.innerText='copied!'" name="code">000000</button>
-</form>
-<script>
-  const hexToBuf = hexStr => Uint8Array.from(hexStr.match(/.{1,2}/g).map((byte) => parseInt(byte, 16)));
-  const lPad = (str, len, pad = '0') => len + 1 >= str.length ? Array(len + 1 - str.length).join(pad) + str : str;
-  const bits5 = (base32) => base32.split('').map(c => lPad(('ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'.indexOf(c)).toString(2), 5)).join('');
-  const b5ToHex = (b5) => b5.match(/.{4}/g).map(b => parseInt(b, 2).toString(16)).join('');
-  const decToHex = (s) => (s < 15.5 ? '0' : '') + Math.round(s).toString(16);
-  const getTimeCounter = () => lPad(decToHex(Math.floor(Math.round(new Date().getTime() / 1000.0) / 30)), 16);
-  const getKey = async (secret) => await crypto.subtle.importKey('raw', hexToBuf(b5ToHex(bits5(secret.toUpperCase()))), { name: 'HMAC', hash: 'SHA-1' }, false, ['sign'])
-  const otp2str = (sig, off = sig[sig.length - 1] & 0xf) => (((sig[off] & 0x7f) << 24) | ((sig[off + 1] & 0xff) << 16) | ((sig[off + 2] & 0xff) << 8) | (sig[off + 3] & 0xff)) % 1000000
-  const getOTP = async (secret) => new Uint8Array(await crypto.subtle.sign({ name: 'HMAC', hash: 'SHA-1' }, await getKey(secret), hexToBuf(getTimeCounter())))
-  const [{secret,code}] = document.forms;
-  secret.value = localStorage.otp;
-  secret.addEventListener('input', e => localStorage.otp = e.target.value);
-  setInterval(() => localStorage.otp && getOTP(localStorage.otp).then(c => code.innerText = otp2str(c)).catch(alert), 1000);
+<script type="module">
+	const el = (tag, props = {}, ch = []) => ch.reduce((e, c) => (e.append(c), e), Object.assign(document.createElement(tag), props));
+	const hexToBuf = hexStr => Uint8Array.from(hexStr.match(/.{1,2}/g).map((byte) => parseInt(byte, 16)));
+	const lPad = (str, len, pad = '0') => len + 1 >= str.length ? Array(len + 1 - str.length).join(pad) + str : str;
+	const bits5 = (base32) => base32.split('').map(c => lPad(('ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'.indexOf(c)).toString(2), 5)).join('');
+	const b5ToHex = (b5) => b5.match(/.{4}/g).map(b => parseInt(b, 2).toString(16)).join('');
+	const decToHex = (s) => (s < 15.5 ? '0' : '') + Math.round(s).toString(16);
+	const getTimeCounter = () => lPad(decToHex(Math.floor(Math.round(new Date().getTime() / 1000.0) / 30)), 16);
+	const getKey = async (secret) => await crypto.subtle.importKey('raw', hexToBuf(b5ToHex(bits5(secret.toUpperCase()))), { name: 'HMAC', hash: 'SHA-1' }, false, ['sign'])
+	const otp2str = (sig, off = sig[sig.length - 1] & 0xf) => (((sig[off] & 0x7f) << 24) | ((sig[off + 1] & 0xff) << 16) | ((sig[off + 2] & 0xff) << 8) | (sig[off + 3] & 0xff)) % 1000000
+	const getOTP = async (secret) => new Uint8Array(await crypto.subtle.sign({ name: 'HMAC', hash: 'SHA-1' }, await getKey(secret), hexToBuf(getTimeCounter())))
+	const list = el("output", {})
+	document.body.replaceChildren(el("form", { onsubmit() { localStorage.setItem(this.name.value, this.seed.value); render(); return false } }, [
+		el("fieldset", {}, [
+			el("legend", {}, [el("input", { name: "name", placeholder: "name", required: true })]),
+			el("input", { type: "password", name: "seed", placeholder: "seed", required: true, minLength: "32", maxLength: "32" }),
+			el("input", { type: "submit", value: "+" })
+		]), list]));
+	const onclick = function () { const txt = this.innerText; setTimeout(() => this.innerText = txt, 500); navigator.clipboard.writeText(txt); this.innerText = 'copied!' }
+	const render = async () => list.replaceChildren(...await Promise.all(Object.entries(localStorage).map(async ([name, seed]) => el("fieldset", {}, [
+		el("legend", {}, [name]), el("button", { type: "button", onclick }, [String(otp2str(await getOTP(seed))).padStart(6, 0)]), el("button", { type: "button", onclick() { if (!confirm(`delete ${name}?`)) return; localStorage.removeItem(name); render() } }, ["×"])
+	]))))
+	setInterval(render, 1000); render()
 </script>
