@@ -1,0 +1,46 @@
+# Projects
+- [dzr](https://github.com/yne/dzr) ★234 : deezer.com Player (CLI & VSCode) (JavaScript)
+- [vcd](https://github.com/yne/vcd) ★120 : VCD file (Value Change Dump) command line viewer (C)
+- [psndl](https://github.com/yne/psndl) ★62 : PlayStation Network pkgs  (HTML)
+- [picon](https://github.com/yne/picon) ★25 : Hackable Ligature Pico icoN set (HTML)
+- [js-psp](https://github.com/yne/js-psp) ★20 : PlayStation Portable Javascript Engine (C)
+- [feed](https://github.com/yne/feed) ★9 : offline-first RSS reader (HTML)
+- [rle](https://github.com/yne/rle) ★7 : ETSI TS 103 179 Implementation of the Return Link Encapsulation (C)
+- [resume](https://github.com/yne/resume) ★7 : Markdown to resume with gist support (HTML)
+- [R3K](https://github.com/yne/R3K) ★7 : 5 stages pipeline MIPS R3000 (VHDL)
+- [tilemap-sdl](https://github.com/yne/tilemap-sdl) ★4 : sdl2 tilemap engine (C)
+- [ssc.css](https://github.com/yne/ssc.css) ★4 : Small Semantic-first Class-last CSS (CSS)
+- [opentube-psp](https://github.com/yne/opentube-psp) ★4 : Youtube player for the Playstation Portable (C)
+- [renault-radio-code](https://github.com/yne/renault-radio-code) ★3 : Radio Code Generator for Renault car (HTML)
+- [md2dom](https://github.com/yne/md2dom) ★2 : Mardown to DOM (HTML)
+- [yne.github.io](https://github.com/yne/yne.github.io) ★1 :  (HTML)
+- [html2json](https://github.com/yne/html2json) ★1 : Tiny HTML (XML) to JSON (JsonML) converter (C)
+- [git-appraise-vscode](https://github.com/yne/git-appraise-vscode) ★1 : Git appraise in VSCode (JavaScript)
+- [qr](https://github.com/yne/qr) ★0 : small QR code encoder (C)
+- [postgrest-spa](https://github.com/yne/postgrest-spa) ★0 : Postgrest + Vue SPA boilerplate (HTML)
+- [git-issue](https://github.com/yne/git-issue) ★0 : git object based issue management (Go)
+- [frame](https://github.com/yne/frame) ★0 : Photo-Frame like GUI for trash android tablet (HTML)
+# Gists
+- [2025-07-06](https://gist.github.com/yne/6e83bcaac2a1e9b56b7e503870c56cfd) image to ansi code graphic
+- [2024-12-10](https://gist.github.com/yne/f683005540d3d618d04c36c282a44035) Github API based appraise
+- [2024-08-18](https://gist.github.com/yne/d6dad90416727c2e027774857233524f) Renault Car Radio Unlock Code Generator
+- [2023-05-14](https://gist.github.com/yne/5d35b39b3887afad38ad28851d0fcc4a) llama.cpp minimal websocket based interface
+- [2023-05-08](https://gist.github.com/yne/cb09763848cb46f5c2f26e0384d6064a) Memes and errors in Win32
+- [2023-02-12](https://gist.github.com/yne/22ad8abdb03df2f37def499f4622c2e0) excel sheet to json
+- [2022-02-09](https://gist.github.com/yne/21648c9e48d9e9ef84f3d303d1185c96) 615A 8002/8004 LUH JSON dumper
+- [2020-04-12](https://gist.github.com/yne/5095dbc85b1ba34ca3a2079006b9931c) mode7 style tilemap X11+GL (require a 32x32 ./sprite.bmp)
+- [2019-12-30](https://gist.github.com/yne/daf364449d0d0b018cdb5e22a3994926) unfinished MIPS generator for TCC
+- [2019-07-11](https://gist.github.com/yne/d93dccc34184a8f9488bdc088d631050) Tiny epoll-based HTTP server
+- [2018-08-18](https://gist.github.com/yne/239aafaccbcb75108e3577277dd0984e) DOM for TTY
+- [2018-08-12](https://gist.github.com/yne/6dc8253f89e13dd63cd0c3a0192dd35c) Lambda in C11 + Generic
+- [2017-09-28](https://gist.github.com/yne/bc4b7426cbe5f18134772a1f0aa7c6f1) Modular HTTP server
+- [2017-06-02](https://gist.github.com/yne/4d10640be129bfa0022db21715998576) wget -O- git.io/yne.install | bash
+- [2017-03-12](https://gist.github.com/yne/98ce34ae111b531390bc46985518bb57) UPNP port forwarding managment 
+- [2017-02-13](https://gist.github.com/yne/ee5dbf6a233754d8bd51ef7bb3d0a64c) khash diff example
+- [2016-10-10](https://gist.github.com/yne/bc816f2549313e65e122da62b2b5671b) Smart json import/update into internal structure
+- [2016-06-12](https://gist.github.com/yne/c71104cb03f9fb307d72d43a3d13d74d) CLI Chat Mockup for libstrophe
+- [2016-06-09](https://gist.github.com/yne/e4adf578a14953c4547d078406d575d4) Play argv wavs using ALSA
+- [2015-12-20](https://gist.github.com/yne/6ff42431dd53b81813a7) Extract from a blob using file header 
+- [2015-12-19](https://gist.github.com/yne/ec160a4cdb987da879f4) Luminess in pure OpenGL
+- [2015-12-18](https://gist.github.com/yne/1955fa8b7403b4ed73a6) Easily hackable SDL based BMS player
+- [2015-12-18](https://gist.github.com/yne/20d1bdadab88d13b0e0d) active to passive FTP server proxy 
