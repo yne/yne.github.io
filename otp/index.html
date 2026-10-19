@@ -21,7 +21,7 @@
 			el("input", { type: "submit", value: "+" })
 		]), list]));
 	const onclick = function () { const txt = this.innerText; setTimeout(() => this.innerText = txt, 500); navigator.clipboard.writeText(txt); this.innerText = 'copied!' }
-	const render = async () => list.replaceChildren(...await Promise.all(Object.entries(localStorage).map(async ([name, seed]) => el("fieldset", {}, [
+	const render = async () => list.replaceChildren(...await Promise.all(Object.entries(localStorage).filter(kv => kv[1].length == 32).map(async ([name, seed]) => el("fieldset", {}, [
 		el("legend", {}, [name]), el("button", { type: "button", onclick }, [String(otp2str(await getOTP(seed))).padStart(6, 0)]), el("button", { type: "button", onclick() { if (!confirm(`delete ${name}?`)) return; localStorage.removeItem(name); render() } }, ["×"])
 	]))))
 	setInterval(render, 1000); render()
